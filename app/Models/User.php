@@ -20,6 +20,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'nome_de_guerra',
         'email',
         'password',
         'ra',
@@ -28,6 +29,10 @@ class User extends Authenticatable
         'points',
         'faults',
         'photo',
+        'numero',
+        'turma',
+        'is_cfc',
+        'telefone',
     ];
 
     /**
@@ -50,6 +55,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_cfc' => 'boolean',
         ];
     }
 }

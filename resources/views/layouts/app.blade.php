@@ -34,6 +34,12 @@
                     <i class="fa-solid fa-house"></i>
                     <span>Início</span>
                 </a>
+                @if(in_array(auth()->user()->role, ['master', 'instructor']))
+                <a href="{{ route('atiradores.index') }}" class="nav-item {{ request()->routeIs('atiradores.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-person-military-rifle"></i>
+                    <span>Atiradores</span>
+                </a>
+                @endif
                 <a href="#" class="nav-item">
                     <i class="fa-solid fa-calendar-days"></i>
                     <span>Escalas (QTS)</span>
