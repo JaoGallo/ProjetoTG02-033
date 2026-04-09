@@ -3,14 +3,6 @@
 @section('title', 'Dashboard')
 
 @section('content')
-    <!-- Desktop Header Info (Hidden on Mobile) -->
-    <div class="header-desktop">
-        <div>
-            <h1 style="margin: 0; color: var(--primary-olive-dark);">Dashboard</h1>
-            <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">Sistema de Gestão - TG 02-033</p>
-        </div>
-    </div>
-
     <div class="welcome-section">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
             <div style="display: flex; align-items: center; gap: 1.25rem;">

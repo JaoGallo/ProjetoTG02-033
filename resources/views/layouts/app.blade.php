@@ -14,6 +14,16 @@
 
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     @yield('styles')
+
+    <!-- Pre-render Sidebar State -->
+    <script>
+        (function() {
+            const sidebarState = localStorage.getItem('sidebarState');
+            if (sidebarState === 'collapsed' && window.innerWidth > 768) {
+                document.documentElement.classList.add('sidebar-collapsed-init');
+            }
+        })();
+    </script>
 </head>
 
 <body>
@@ -73,14 +83,18 @@
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
         <!-- Main Content Area -->
-        <div class="main-content">
-            <!-- Mobile Top Bar -->
-            <header class="mobile-header">
-                <button class="menu-toggle" id="menuToggle">
+        <div class="main-content" id="mainContent">
+            <!-- Unified Top Bar -->
+            <header class="app-header">
+                <button class="menu-toggle" id="menuToggle" title="Alternar Barra Lateral">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <div style="font-weight: 700; color: var(--primary-olive-dark);">@yield('title', 'DASHBOARD')</div>
-                <img src="{{ asset('tg_logo.png') }}" alt="Logo" style="height: 35px;">
+                <div style="font-weight: 700; color: var(--primary-olive-dark); font-size: 1.1rem; letter-spacing: -0.5px;">
+                    @yield('title', 'DASHBOARD')
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <img src="{{ asset('tg_logo.png') }}" alt="Logo" style="height: 35px;">
+                </div>
             </header>
 
             <div class="dashboard-container">
@@ -93,24 +107,65 @@
     <script>
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
         const overlay = document.getElementById('sidebarOverlay');
 
+        // Apply initial state from localStorage
+        function applyInitialState() {
+            if (window.innerWidth > 768) {
+                const sidebarState = localStorage.getItem('sidebarState');
+                if (sidebarState === 'collapsed') {
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('full-width');
+                }
+            }
+        }
+
         function toggleMenu() {
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : 'auto';
+            if (window.innerWidth <= 768) {
+                // Mobile behavior (Overlay)
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : 'auto';
+            } else {
+                // Desktop behavior (Collapse)
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('full-width');
+                
+                // Save state
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarState', isCollapsed ? 'collapsed' : 'expanded');
+            }
         }
 
         if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
         if (overlay) overlay.addEventListener('click', toggleMenu);
 
+        // Apply state on load
+        applyInitialState();
+
         // Close menu when clicking a nav item (on mobile)
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 if (window.innerWidth <= 768) {
-                    toggleMenu();
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = 'auto';
                 }
             });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                applyInitialState();
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('full-width');
+            }
         });
     </script>
     @yield('scripts')

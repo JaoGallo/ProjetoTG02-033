@@ -3,14 +3,6 @@
 @section('title', 'Meu Perfil')
 
 @section('content')
-    <div class="header-desktop">
-        <div>
-            <h1 style="margin: 0; color: var(--primary-olive-dark);">Meu Perfil</h1>
-            <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">Gerencie suas informações e segurança.
-            </p>
-        </div>
-    </div>
-
     <!-- Mensagens de Sucesso/Erro -->
     @if(session('success'))
         <div class="alert alert-success">
