@@ -23,3 +23,9 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /storage/app/public/profiles/*
+*.xlsx
+*.xls
+excel_dump.json
+analyze_formulas.cjs
+parse_excel.cjs
+summarize_json.cjs

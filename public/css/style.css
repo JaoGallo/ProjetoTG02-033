@@ -767,3 +767,138 @@ html.sidebar-collapsed-init .main-content {
         display: block;
     }
 }
+
+/* --- Escalas (QTS) Styles --- */
+.matrix-container {
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    margin-bottom: 2rem;
+}
+
+.matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.matrix-table th,
+.matrix-table td {
+    border: 1px solid var(--border-color);
+    padding: 0.6rem 0.75rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.matrix-table th {
+    background: #f8faf9;
+    font-weight: 700;
+    color: var(--primary-olive-dark);
+}
+
+/* Sticky first columns (Nr and Name) */
+.matrix-table th:first-child,
+.matrix-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: #fff !important;
+    width: 50px;
+    min-width: 50px;
+}
+
+.matrix-table th:nth-child(2),
+.matrix-table td:nth-child(2) {
+    position: sticky;
+    left: 50px;
+    z-index: 10;
+    background: #fff !important;
+    text-align: left;
+    min-width: 150px;
+}
+
+.matrix-table th:first-child,
+.matrix-table th:nth-child(2) {
+    z-index: 20;
+    background: #f8faf9 !important;
+}
+
+/* Cell Colors */
+.cell-gd {
+    background-color: #fee2e2 !important; /* light red */
+    color: #dc2626;
+    font-weight: 800;
+}
+
+.cell-cmt {
+    background-color: #ffedd5 !important; /* light orange */
+    color: #ea580c;
+    font-weight: 800;
+}
+
+.cell-proximo {
+    background-color: #fef9c3 !important; /* light yellow */
+    color: #ca8a04;
+    font-weight: 800;
+}
+
+.cell-inicial {
+    background-color: #dbeafe !important; /* light blue */
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.cell-feriado {
+    background-color: #dcfce7 !important; /* light green */
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.cell-inativo {
+    background-color: #374151 !important; /* dark gray */
+    color: #f9fafb;
+}
+
+.cell-fila {
+    background-color: #fff;
+    color: var(--text-secondary);
+}
+
+/* Totalizer line */
+.row-totalizer {
+    background: #f1f5f2 !important;
+}
+
+.row-totalizer td {
+    font-weight: 900;
+    color: var(--primary-olive-dark);
+}
+
+/* Bulletin Page */
+.boletim-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--primary-olive);
+}
+
+.boletim-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.boletim-table th, 
+.boletim-table td {
+    border: 1px solid #000;
+    padding: 10px;
+    text-align: left;
+}
+
+.boletim-table th {
+    background: #f0f0f0;
+    text-transform: uppercase;
+}

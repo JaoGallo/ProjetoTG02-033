@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PhotoController;
+use App\Http\Controllers\EscalaController;
 
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -35,11 +36,31 @@ Route::middleware(['auth', 'first_access'])->group(function () {
         Route::patch('/atiradores/{user}/toggle-cfc', [\App\Http\Controllers\AtiradorController::class, 'toggleCfc'])->name('atiradores.toggle-cfc');
         Route::delete('/atiradores/{user}', [\App\Http\Controllers\AtiradorController::class, 'destroy'])->name('atiradores.destroy');
 
-        // Gestão de Avisos (CRUD completo para instrutores)
+        // Gestão de Avisos
         Route::resource('avisos', \App\Http\Controllers\AnnouncementController::class)->except(['show']);
+
+        // Sistema de Escalas (QTS) — Novo Fluxo de ADTs
+        Route::get('/escalas', [EscalaController::class, 'index'])->name('escalas.index');
+        Route::get('/escalas/criar', [EscalaController::class, 'criarAdt'])->name('escalas.criar');
+        Route::post('/escalas/criar', [EscalaController::class, 'salvarAdt'])->name('escalas.store');
+
+        Route::get('/escalas/{config}/editar', [EscalaController::class, 'edit'])->name('escalas.edit');
+        Route::put('/escalas/{config}', [EscalaController::class, 'update'])->name('escalas.update');
+        Route::delete('/escalas/{config}', [EscalaController::class, 'destroy'])->name('escalas.destroy');
+
+        Route::get('/escalas/{grupo}/configurar', [EscalaController::class, 'configurar'])->name('escalas.configurar');
+        Route::post('/escalas/{grupo}/configurar', [EscalaController::class, 'salvarConfig'])->name('escalas.salvarConfig');
+        Route::get('/escalas/{grupo}/visualizar', [EscalaController::class, 'visualizar'])->name('escalas.visualizar');
+        Route::get('/escalas/feriados', [EscalaController::class, 'feriados'])->name('escalas.feriados');
+        Route::post('/escalas/feriados', [EscalaController::class, 'salvarFeriado'])->name('escalas.salvarFeriado');
+        Route::delete('/escalas/feriados/{feriado}', [EscalaController::class, 'deletarFeriado'])->name('escalas.deletarFeriado');
+        Route::post('/escalas/swap', [EscalaController::class, 'swap'])->name('escalas.swap');
     });
 
-    // Rota de visualização de aviso (acessível para todos autenticados)
+    // Boletim — acessível a todos autenticados
+    Route::get('/escalas/boletim/{data}', [EscalaController::class, 'boletim'])->name('escalas.boletim');
+    Route::get('/escalas/boletim/{data}/pdf', [EscalaController::class, 'exportarPdf'])->name('escalas.pdf');
+
+    // Aviso — visualização para todos autenticados
     Route::get('/avisos/{aviso}', [\App\Http\Controllers\AnnouncementController::class, 'show'])->name('avisos.show');
 });
-

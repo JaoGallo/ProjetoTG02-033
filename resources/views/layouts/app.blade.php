@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Tiro de Guerra')</title>
+    <link rel="icon" type="image/png" href="{{ asset('tg_logo.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -50,7 +51,7 @@
                     <span>Atiradores</span>
                 </a>
                 @endif
-                <a href="#" class="nav-item">
+                <a href="{{ route('escalas.index') }}" class="nav-item {{ request()->routeIs('escalas.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-calendar-days"></i>
                     <span>Escalas (QTS)</span>
                 </a>

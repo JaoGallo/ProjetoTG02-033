@@ -35,6 +35,24 @@ class User extends Authenticatable
         'telefone',
     ];
 
+    public function escalaDiaria()
+    {
+        return $this->hasMany(\App\Models\EscalaDiaria::class);
+    }
+
+    public function filaEstado()
+    {
+        return $this->hasMany(\App\Models\FilaEstado::class);
+    }
+
+    /**
+     * Retorna 'Mon' ou 'Atdr' baseado no is_cfc.
+     */
+    public function getGrupoEscalaAttribute(): string
+    {
+        return $this->is_cfc ? 'Mon' : 'Atdr';
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
