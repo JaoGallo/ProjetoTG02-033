@@ -34,7 +34,7 @@ class AnnouncementController extends Controller
             'attachment' => 'nullable|file|max:5120', // Max 5MB
         ]);
 
-        $turma = date('Y'); // Turma ativa por padrão
+        $turma = config('tg.turma_ativa');
 
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {

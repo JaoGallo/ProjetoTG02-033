@@ -14,7 +14,7 @@ class AtiradorController extends Controller
 {
     public function index(Request $request)
     {
-        $turma = $request->input('turma', date('Y'));
+        $turma = $request->input('turma', config('tg.turma_ativa'));
         $atiradores = User::whereIn('role', ['atirador', 'monitor'])
                           ->where('turma', $turma)
                           ->orderBy('numero')
@@ -35,7 +35,7 @@ class AtiradorController extends Controller
             'telefone' => 'nullable|string|max:20',
         ]);
 
-        $turma = $request->turma ?: date('Y');
+        $turma = $request->turma ?: config('tg.turma_ativa');
         
         // Senha padrão conforme a regra
         $senhaPadrao = 'Atirador' . $request->numero . str_replace(' ', '', $request->nome_de_guerra);

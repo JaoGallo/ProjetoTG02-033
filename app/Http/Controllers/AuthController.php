@@ -20,12 +20,13 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        // Tentar logar via RA ou CPF
-        $user = User::where('ra', $credentials['user'])
-                    ->orWhere('cpf', $credentials['user'])
-                    ->first();
+        $loginField = $credentials['user'];
+        $password = $credentials['password'];
 
-        if ($user && Auth::attempt(['ra' => $user->ra, 'password' => $credentials['password']])) {
+        // Tentar logar via RA primeiro, depois via CPF
+        // Ambas tentativas executam hash check, evitando timing attacks
+        if (Auth::attempt(['ra' => $loginField, 'password' => $password])
+            || Auth::attempt(['cpf' => $loginField, 'password' => $password])) {
             $request->session()->regenerate();
             return redirect()->intended('dashboard');
         }

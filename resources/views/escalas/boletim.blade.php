@@ -28,59 +28,47 @@
             <p style="margin: 10px 0 0 0; font-weight: 700; color: var(--primary-olive-dark);">ORDEM DE SERVIÇO Nº ______ / {{ $carbon->year }}</p>
         </div>
 
-        <h4 style="border-left: 4px solid var(--primary-olive); padding-left: 10px; margin: 2rem 0 1rem 0; color: var(--primary-olive-dark);">1. COMANDANTE DA GUARDA</h4>
         <table class="boletim-table">
             <thead>
                 <tr>
-                    <th style="width: 100px;">Grupo</th>
-                    <th style="width: 80px;">Nr</th>
-                    <th>Nome de Guerra</th>
+                    <th style="width: 30%;">Função</th>
+                    <th style="width: 25%;">Grad - Nr</th>
+                    <th style="width: 45%;">Nome</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($dados['mon']->where('funcao', 'comandante') as $reg)
+                {{-- Comandantes da Guarda --}}
+                @php $monList = $dados['mon']->values(); @endphp
+                @forelse($monList as $idx => $reg)
                     <tr>
-                        <td>Monitor</td>
-                        <td>{{ $reg->user->numero }}</td>
+                        @if($idx === 0)
+                            <td rowspan="{{ count($monList) }}" style="font-weight: 700; vertical-align: middle;">Cmt Gd</td>
+                        @endif
+                        <td>Mon - {{ str_pad($reg->user->numero, 2, '0', STR_PAD_LEFT) }}</td>
                         <td style="font-weight: 700;">{{ $reg->user->nome_de_guerra }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" style="text-align: center; color: var(--text-secondary);">Nenhum Monitor em serviço hoje.</td>
+                        <td style="font-weight: 700;">Cmt Gd</td>
+                        <td colspan="2" style="text-align: center; color: var(--text-secondary);">Nenhum em serviço hoje.</td>
                     </tr>
                 @endforelse
-            </tbody>
-        </table>
 
-        <h4 style="border-left: 4px solid var(--primary-olive); padding-left: 10px; margin: 2rem 0 1rem 0; color: var(--primary-olive-dark);">2. SENTINELAS (ATIRADORES)</h4>
-        <table class="boletim-table">
-            <thead>
-                <tr>
-                    <th style="width: 80px;">Nr</th>
-                    <th>Nome de Guerra</th>
-                    <th>Posto / Turno</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $count = 1; @endphp
-                @forelse($dados['atdr'] as $reg)
+                {{-- Sentinelas --}}
+                @php $atdrList = $dados['atdr']->values(); @endphp
+                @forelse($atdrList as $idx => $reg)
                     <tr>
-                        <td>{{ $reg->user->numero }}</td>
+                        @if($idx === 0)
+                            <td rowspan="{{ count($atdrList) }}" style="font-weight: 700; vertical-align: middle;">Sentinelas</td>
+                        @endif
+                        <td>Atdr - {{ str_pad($reg->user->numero, 2, '0', STR_PAD_LEFT) }}</td>
                         <td style="font-weight: 700;">{{ $reg->user->nome_de_guerra }}</td>
-                        <td>{{ $count++ }}º Quarto de Hora</td>
                     </tr>
                 @empty
-                    @forelse($dados['mon']->where('funcao', 'guarda') as $reg)
-                        <tr>
-                            <td>{{ $reg->user->numero }}</td>
-                            <td style="font-weight: 700;">{{ $reg->user->nome_de_guerra }}</td>
-                            <td>Monitor (Reforço)</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" style="text-align: center; color: var(--text-secondary);">Nenhum Atirador em serviço hoje.</td>
-                        </tr>
-                    @endforelse
+                    <tr>
+                        <td style="font-weight: 700;">Sentinelas</td>
+                        <td colspan="2" style="text-align: center; color: var(--text-secondary);">Nenhum em serviço hoje.</td>
+                    </tr>
                 @endforelse
             </tbody>
         </table>

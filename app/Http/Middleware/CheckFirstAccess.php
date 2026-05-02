@@ -15,7 +15,7 @@ class CheckFirstAccess
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && auth()->user()->role === 'atirador' && empty(auth()->user()->email)) {
+        if (auth()->check() && !in_array(auth()->user()->role, ['master', 'instructor']) && empty(auth()->user()->email)) {
             // Se estiver tentando acessar rotas que não sejam do fluxo de primeiro acesso ou logout
             if (! $request->routeIs('primeiro-acesso') && ! $request->routeIs('primeiro-acesso.store') && ! $request->routeIs('logout')) {
                 return redirect()->route('primeiro-acesso');

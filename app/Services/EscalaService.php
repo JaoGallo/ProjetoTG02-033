@@ -25,8 +25,9 @@ class EscalaService
         DB::table('escala_diaria')->where('escala_config_id', $config->id)->delete();
 
         // 2. Carregar tropa (Monitores e Atiradores)
-        $todosMonitores = User::where('is_cfc', true)->where('role', 'atirador')->where('turma', 2025)->orderBy('numero')->get();
-        $todosAtiradores = User::where('is_cfc', false)->where('role', 'atirador')->where('turma', 2025)->orderBy('numero')->get();
+        $turma = config('tg.turma_ativa');
+        $todosMonitores = User::where('is_cfc', true)->where('role', 'atirador')->where('turma', $turma)->orderBy('numero')->get();
+        $todosAtiradores = User::where('is_cfc', false)->where('role', 'atirador')->where('turma', $turma)->orderBy('numero')->get();
 
         // 3. Registrar o DIA 1 (Manual)
         $this->registrarDiaManual($config->id, $dataInicio, $dia1MonIds, $dia1AtdrIds);
@@ -128,8 +129,8 @@ class EscalaService
             ->get()
             ->sortBy(fn($r) => [$r->funcao === 'guarda' ? 1 : 0, $r->user->numero]);
 
-        $mon  = $registros->filter(fn($r) => $r->user->is_cfc);
-        $atdr = $registros->filter(fn($r) => !$r->user->is_cfc);
+        $mon  = $registros->filter(fn($r) => $r->user->is_cfc)->values();
+        $atdr = $registros->filter(fn($r) => !$r->user->is_cfc)->values();
 
         return [
             'data'   => Carbon::parse($data),

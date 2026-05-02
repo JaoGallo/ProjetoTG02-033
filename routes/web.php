@@ -2,25 +2,22 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\EscalaController;
 
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth', 'first_access'])->group(function () {
     Route::get('/primeiro-acesso', [\App\Http\Controllers\PrimeiroAcessoController::class, 'index'])->name('primeiro-acesso');
     Route::post('/primeiro-acesso', [\App\Http\Controllers\PrimeiroAcessoController::class, 'store'])->name('primeiro-acesso.store');
 
-    Route::get('/dashboard', function () {
-        $announcements = \App\Models\Announcement::where('turma', date('Y'))
-                                                ->orderBy('priority', 'desc')
-                                                ->orderBy('created_at', 'desc')
-                                                ->get();
-        return view('dashboard', compact('announcements'));
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/escalas', [EscalaController::class, 'index'])->name('escalas.index');
 
     Route::get('/perfil', [ProfileController::class, 'index'])->name('profile');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
@@ -37,10 +34,9 @@ Route::middleware(['auth', 'first_access'])->group(function () {
         Route::delete('/atiradores/{user}', [\App\Http\Controllers\AtiradorController::class, 'destroy'])->name('atiradores.destroy');
 
         // Gestão de Avisos
-        Route::resource('avisos', \App\Http\Controllers\AnnouncementController::class)->except(['show']);
+        Route::resource('avisos', \App\Http\Controllers\AnnouncementController::class)->except(['show', 'edit', 'update']);
 
         // Sistema de Escalas (QTS) — Novo Fluxo de ADTs
-        Route::get('/escalas', [EscalaController::class, 'index'])->name('escalas.index');
         Route::get('/escalas/criar', [EscalaController::class, 'criarAdt'])->name('escalas.criar');
         Route::post('/escalas/criar', [EscalaController::class, 'salvarAdt'])->name('escalas.store');
 

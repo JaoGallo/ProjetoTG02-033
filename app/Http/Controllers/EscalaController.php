@@ -28,8 +28,9 @@ class EscalaController extends Controller
 
     public function criarAdt()
     {
-        $monitores = User::where('is_cfc', true)->where('role', 'atirador')->where('turma', 2025)->orderBy('numero')->get();
-        $atiradores = User::where('is_cfc', false)->where('role', 'atirador')->where('turma', 2025)->orderBy('numero')->get();
+        $turma = config('tg.turma_ativa');
+        $monitores = User::where('is_cfc', true)->where('role', 'atirador')->where('turma', $turma)->orderBy('numero')->get();
+        $atiradores = User::where('is_cfc', false)->where('role', 'atirador')->where('turma', $turma)->orderBy('numero')->get();
         
         return view('escalas.criar_adt', compact('monitores', 'atiradores'));
     }
@@ -58,7 +59,10 @@ class EscalaController extends Controller
                 'qnt_gd_dia' => count($request->dia1_atiradores),
                 'dias_iniciais' => 0,
                 'valor_inicial' => 1,
-                'status' => 'publicado'
+                'status' => 'publicado',
+                'part2_instrucao' => $request->part2_instrucao,
+                'part3_assuntos_gerais' => $request->part3_assuntos_gerais,
+                'part4_justica_disciplina' => $request->part4_justica_disciplina,
             ]);
 
             $this->escalaService->gerarAditamentoCompleto($config, $request->dia1_monitores, $request->dia1_atiradores);
@@ -87,8 +91,9 @@ class EscalaController extends Controller
 
     public function edit(EscalaConfig $config, Request $request)
     {
-        $monitores = User::where('is_cfc', true)->where('role', 'atirador')->where('turma', 2025)->orderBy('numero')->get();
-        $atiradores = User::where('is_cfc', false)->where('role', 'atirador')->where('turma', 2025)->orderBy('numero')->get();
+        $turma = config('tg.turma_ativa');
+        $monitores = User::where('is_cfc', true)->where('role', 'atirador')->where('turma', $turma)->orderBy('numero')->get();
+        $atiradores = User::where('is_cfc', false)->where('role', 'atirador')->where('turma', $turma)->orderBy('numero')->get();
 
         $registros = EscalaDiaria::where('escala_config_id', $config->id)
             ->get()
@@ -165,6 +170,13 @@ class EscalaController extends Controller
 
             DB::table('escala_diaria')->insert($batch);
 
+            // Salvar as outras partes do Aditamento (2ª, 3ª e 4ª)
+            $config->update([
+                'part2_instrucao' => $request->part2_instrucao,
+                'part3_assuntos_gerais' => $request->part3_assuntos_gerais,
+                'part4_justica_disciplina' => $request->part4_justica_disciplina,
+            ]);
+
             DB::commit();
             return redirect()->route('escalas.edit', $config->id)->with('success', 'Dia ' . $dataEdit->format('d/m') . ' atualizado com sucesso!');
 
@@ -184,7 +196,7 @@ class EscalaController extends Controller
 
         $isCfc = $grupo === 'Mon';
         $integrantes = User::where('role', 'atirador')
-            ->where('turma', 2025)
+            ->where('turma', config('tg.turma_ativa'))
             ->where('is_cfc', $isCfc)
             ->orderBy('numero')
             ->get();
@@ -239,7 +251,7 @@ class EscalaController extends Controller
 
         $isCfc = $grupo === 'Mon';
         $integrantes = User::where('role', 'atirador')
-            ->where('turma', 2025)
+            ->where('turma', config('tg.turma_ativa'))
             ->where('is_cfc', $isCfc)
             ->orderBy('numero')
             ->get();
@@ -343,35 +355,50 @@ class EscalaController extends Controller
     public function swap(Request $request)
     {
         $request->validate([
-            'data'                    => 'required|date',
+            'data'                    => 'required|date|after_or_equal:today',
             'integrante_origem_id'    => 'required|exists:users,id',
             'integrante_destino_id'   => 'required|exists:users,id|different:integrante_origem_id',
-            'motivo'                  => 'nullable|string',
+            'motivo'                  => 'nullable|string|max:500',
         ]);
 
         $data    = $request->data;
         $idA     = $request->integrante_origem_id;
         $idB     = $request->integrante_destino_id;
 
-        $regA = EscalaDiaria::where('user_id', $idA)->where('data', $data)->firstOrFail();
-        $regB = EscalaDiaria::where('user_id', $idB)->where('data', $data)->firstOrFail();
+        try {
+            DB::beginTransaction();
 
-        // Troca os valores
-        [$regA->valor, $regB->valor] = [$regB->valor, $regA->valor];
-        [$regA->funcao, $regB->funcao] = [$regB->funcao, $regA->funcao];
+            $regA = EscalaDiaria::where('user_id', $idA)->where('data', $data)->firstOrFail();
+            $regB = EscalaDiaria::where('user_id', $idB)->where('data', $data)->firstOrFail();
 
-        $regA->save();
-        $regB->save();
+            // Verifica se pertencem ao mesmo ADT
+            if ($regA->escala_config_id !== $regB->escala_config_id) {
+                DB::rollBack();
+                return back()->withErrors(['error' => 'Os integrantes pertencem a aditamentos diferentes.']);
+            }
 
-        // Registra auditoria
-        \App\Models\Troca::create([
-            'data'                  => $data,
-            'integrante_origem_id'  => $idA,
-            'integrante_destino_id' => $idB,
-            'motivo'                => $request->motivo,
-            'criado_por'            => auth()->id(),
-        ]);
+            // Troca os valores
+            [$regA->valor, $regB->valor] = [$regB->valor, $regA->valor];
+            [$regA->funcao, $regB->funcao] = [$regB->funcao, $regA->funcao];
 
-        return redirect()->back()->with('success', 'Troca de serviço registrada com sucesso!');
+            $regA->save();
+            $regB->save();
+
+            // Registra auditoria
+            \App\Models\Troca::create([
+                'data'                  => $data,
+                'integrante_origem_id'  => $idA,
+                'integrante_destino_id' => $idB,
+                'motivo'                => $request->motivo,
+                'criado_por'            => auth()->id(),
+            ]);
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Troca de serviço registrada com sucesso!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Falha ao realizar troca: ' . $e->getMessage()]);
+        }
     }
 }

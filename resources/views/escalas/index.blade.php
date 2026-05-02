@@ -21,12 +21,14 @@
 <div class="adt-carousel-wrapper">
     <div class="adt-carousel" id="adtCarousel">
         <!-- Card de Criação Rápida -->
-        <a href="{{ route('escalas.criar') }}" class="adt-card create-card">
-            <div class="create-icon">
-                <i class="fa-solid fa-calendar-plus"></i>
-            </div>
-            <span>Criar Novo Aditamento</span>
-        </a>
+        @if(in_array(Auth::user()->role, ['master', 'instructor']))
+            <a href="{{ route('escalas.criar') }}" class="adt-card create-card">
+                <div class="create-icon">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                </div>
+                <span>Criar Novo Aditamento</span>
+            </a>
+        @endif
 
         @foreach($adts as $adt)
         <div class="adt-card {{ $adt->data_fim->isPast() ? 'past' : 'active' }}">
@@ -44,13 +46,13 @@
             </div>
 
             <div class="adt-actions">
-                @if(!$adt->data_fim->isPast())
+                @if(!$adt->data_fim->isPast() && in_array(Auth::user()->role, ['master', 'instructor']))
                     <a href="{{ route('escalas.edit', $adt->id) }}" title="Editar Aditamento" style="color: #3b82f6;">
                         <i class="fa-solid fa-pencil"></i>
                     </a>
                 @endif
                 
-                @if($adt->data_inicio->isFuture() || (auth()->check() && auth()->user()->role === 'master'))
+                @if(in_array(Auth::user()->role, ['master', 'instructor']) && ($adt->data_inicio->isFuture() || (auth()->check() && auth()->user()->role === 'master')))
                     <form action="{{ route('escalas.destroy', $adt->id) }}" method="POST" style="display:inline;" class="delete-adt-form">
                         @csrf
                         @method('DELETE')
