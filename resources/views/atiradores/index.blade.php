@@ -191,6 +191,9 @@
                 @endfor
             </select>
         </form>
+        <button class="btn btn-secondary" onclick="openImportModal()" style="display: flex; align-items: center; gap: 8px; background: #4b5563;">
+            <i class="fa-solid fa-file-import"></i> Importar Excel
+        </button>
         <button class="btn btn-primary" onclick="openCreateModal()" style="display: flex; align-items: center; gap: 8px;">
             <i class="fa-solid fa-user-plus"></i> Novo Atirador
         </button>
@@ -277,6 +280,40 @@
                 <button type="button" onclick="closeModal('modalDeleteAtirador')" class="input-field" style="background: #f3f4f6; cursor: pointer; border: none;">Cancelar</button>
                 <button type="submit" class="btn btn-primary" style="background: #ef4444; border: none;">Sim, Excluir</button>
             </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Importar Excel -->
+<div id="modalImportExcel" class="modal-background">
+    <div class="modal-content-card">
+        <button onclick="closeModal('modalImportExcel')" class="modal-close-btn"><i class="fa-solid fa-xmark"></i></button>
+        <h3 class="modal-title">Importar Atiradores</h3>
+        <p class="modal-subtitle">Selecione o arquivo Excel (.xlsx) para importar em massa.</p>
+        <form action="{{ route('atiradores.import') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="form-grid">
+                <div class="input-wrapper full-width">
+                    <label>Arquivo Excel</label>
+                    <input type="file" name="excel_file" required class="input-field" accept=".xlsx,.xls,.csv">
+                </div>
+                <div class="input-wrapper full-width">
+                    <label>Turma Destino (Ano)</label>
+                    <select name="turma" required class="input-field">
+                        @for ($i = date('Y'); $i <= date('Y') + 1; $i++)
+                            <option value="{{ $i }}">{{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="full-width" style="background: #fdf2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444; margin-top: 10px;">
+                    <p style="font-size: 0.8rem; color: #991b1b; margin: 0;">
+                        <i class="fa-solid fa-circle-info"></i> O sistema buscará automaticamente as colunas de Nome, CPF e RA.
+                    </p>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 25px; padding: 14px; background: #059669;">
+                INICIAR IMPORTAÇÃO
+            </button>
         </form>
     </div>
 </div>
@@ -406,6 +443,10 @@
         document.getElementById('edit_cfc').checked = !!atirador.is_cfc;
         
         document.getElementById('modalEditAtirador').style.display = 'flex';
+    }
+
+    function openImportModal() {
+        document.getElementById('modalImportExcel').style.display = 'flex';
     }
 
     function openDeleteModal(atirador) {

@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Imports\AtiradoresImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AtiradorController extends Controller
 {
@@ -97,6 +99,21 @@ class AtiradorController extends Controller
         $user->save();
 
         return redirect()->back()->with('success', 'Status de CFC atualizado.');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx,xls,csv|max:5120',
+            'turma' => 'required|integer',
+        ]);
+
+        try {
+            Excel::import(new AtiradoresImport($request->turma), $request->file('excel_file'));
+            return redirect()->back()->with('success', 'Importação concluída com sucesso!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erro ao importar: ' . $e->getMessage());
+        }
     }
 
     public function destroy(User $user)

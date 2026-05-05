@@ -32,6 +32,7 @@ Route::middleware(['auth', 'first_access'])->group(function () {
         Route::put('/atiradores/{user}', [\App\Http\Controllers\AtiradorController::class, 'update'])->name('atiradores.update');
         Route::patch('/atiradores/{user}/toggle-cfc', [\App\Http\Controllers\AtiradorController::class, 'toggleCfc'])->name('atiradores.toggle-cfc');
         Route::delete('/atiradores/{user}', [\App\Http\Controllers\AtiradorController::class, 'destroy'])->name('atiradores.destroy');
+        Route::post('/atiradores/import', [\App\Http\Controllers\AtiradorController::class, 'import'])->name('atiradores.import');
 
         // Gestão de Avisos
         Route::resource('avisos', \App\Http\Controllers\AnnouncementController::class)->except(['show', 'edit', 'update']);
