@@ -70,6 +70,15 @@
                 <!-- Sidebar: Tropa -->
                 <div class="tropa-sidebar" id="sidebar-tropa">
                     <h3 style="margin-top: 0; font-size: 0.9rem; color: #333; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 1rem;">Efetivo Disponível</h3>
+                    
+                    <div class="filter-group" style="margin-bottom: 1rem;">
+                        <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; display: block; margin-bottom: 0.3rem;">Filtrar por Turma</label>
+                        <select id="turma-filter" class="form-select" style="width: 100%; padding: 0.5rem; font-size: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color); background: white; outline: none; cursor: pointer;">
+                            @foreach($turmasDisponiveis as $t)
+                                <option value="{{ $t }}" {{ $t == $turma ? 'selected' : '' }}>Turma de {{ $t }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
                     <!-- Gaveta Monitores -->
                     <div class="sidebar-section">
@@ -88,10 +97,13 @@
                             <div id="pool-monitores" class="drag-pool">
                                 @foreach($monitores as $mon)
                                     @if(!in_array($mon->id, $allSelectedIds))
-                                        <div class="drag-item" data-id="{{ $mon->id }}"
+                                        <div class="drag-item" data-id="{{ $mon->id }}" data-type="mon"
                                             data-nome="{{ strtolower($mon->nome_de_guerra) }}" data-numero="{{ $mon->numero }}">
                                             <span class="nr">{{ $mon->numero }}</span>
                                             <span class="nome">{{ $mon->nome_de_guerra }}</span>
+                                            <button type="button" class="remove-item-btn" onclick="removeItem(this)">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
                                             <input type="hidden" class="user-id-input" value="{{ $mon->id }}" disabled>
                                         </div>
                                     @endif
@@ -118,10 +130,13 @@
                             <div id="pool-atiradores" class="drag-pool">
                                 @foreach($atiradores as $atdr)
                                     @if(!in_array($atdr->id, $allSelectedIds))
-                                        <div class="drag-item" data-id="{{ $atdr->id }}"
+                                        <div class="drag-item" data-id="{{ $atdr->id }}" data-type="atdr"
                                             data-nome="{{ strtolower($atdr->nome_de_guerra) }}" data-numero="{{ $atdr->numero }}">
                                             <span class="nr">{{ $atdr->numero }}</span>
                                             <span class="nome">{{ $atdr->nome_de_guerra }}</span>
+                                            <button type="button" class="remove-item-btn" onclick="removeItem(this)">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
                                             <input type="hidden" class="user-id-input" value="{{ $atdr->id }}" disabled>
                                         </div>
                                     @endif
@@ -172,8 +187,8 @@
                                 </div>
                                 
                                 @if($isTodayOrFuture)
-                                    <button type="button" id="btnSubmit" class="btn-primary submit-btn"
-                                        style="height: auto; padding: 0.5rem 1rem;">
+                                    <button type="button" id="btnSubmit" class="btn-primary"
+                                        style="display: flex; align-items: center; gap: 0.5rem; height: 42px;">
                                         <i class="fa-solid fa-save"></i> <span>Salvar Este Dia</span>
                                     </button>
                                 @endif
@@ -193,11 +208,14 @@
                                             $user = $monitores->firstWhere('id', $uid) ?? $atiradores->firstWhere('id', $uid);
                                         @endphp
                                         @if($user)
-                                            <div class="drag-item" data-id="{{ $user->id }}"
+                                            <div class="drag-item" data-id="{{ $user->id }}" data-type="{{ $user->is_cfc ? 'mon' : 'atdr' }}"
                                                 data-nome="{{ strtolower($user->nome_de_guerra) }}"
                                                 data-numero="{{ $user->numero }}">
                                                 <span class="nr">{{ $user->numero }}</span>
                                                 <span class="nome">{{ $user->nome_de_guerra }}</span>
+                                                <button type="button" class="remove-item-btn" onclick="removeItem(this)">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
                                                 <input type="hidden" class="user-id-input" name="dia_monitores[]"
                                                     value="{{ $user->id }}">
                                             </div>
@@ -218,11 +236,14 @@
                                             $user = $monitores->firstWhere('id', $uid) ?? $atiradores->firstWhere('id', $uid);
                                         @endphp
                                         @if($user)
-                                            <div class="drag-item" data-id="{{ $user->id }}"
+                                            <div class="drag-item" data-id="{{ $user->id }}" data-type="{{ $user->is_cfc ? 'mon' : 'atdr' }}"
                                                 data-nome="{{ strtolower($user->nome_de_guerra) }}"
                                                 data-numero="{{ $user->numero }}">
                                                 <span class="nr">{{ $user->numero }}</span>
                                                 <span class="nome">{{ $user->nome_de_guerra }}</span>
+                                                <button type="button" class="remove-item-btn" onclick="removeItem(this)">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
                                                 <input type="hidden" class="user-id-input" name="dia_atiradores[]"
                                                     value="{{ $user->id }}">
                                             </div>
@@ -298,7 +319,7 @@
 
         .submit-btn {
             padding: 0.6rem 1.5rem;
-            background: #16a34a;
+            background: var(--primary-olive);
             font-size: 0.85rem;
             height: 38px;
             display: flex;
@@ -313,7 +334,7 @@
         }
 
         .submit-btn:hover {
-            background: #15803d;
+            background: var(--primary-olive-light);
         }
 
         .search-box {
@@ -539,6 +560,30 @@
                 grid-template-columns: 1fr !important;
             }
         }
+        .remove-item-btn {
+            display: none;
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-left: auto;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .remove-item-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .drop-slot .drag-item .remove-item-btn {
+            display: flex;
+        }
     </style>
 
     @if($isTodayOrFuture)
@@ -559,6 +604,16 @@
             };
 
             document.addEventListener('DOMContentLoaded', function () {
+                // Filtro de Turma
+                const turmaFilter = document.getElementById('turma-filter');
+                if (turmaFilter) {
+                    turmaFilter.addEventListener('change', function() {
+                        const currentUrl = new URL(window.location.href);
+                        currentUrl.searchParams.set('turma', this.value);
+                        window.location.href = currentUrl.toString();
+                    });
+                }
+
                 // Busca e Prefixo
                 document.querySelectorAll('.tropa-search').forEach(search => {
                     search.addEventListener('input', function () {
@@ -613,6 +668,24 @@
                         checkPlaceholder(slotsSentinelas);
                     }
                 });
+
+                window.removeItem = function(btn) {
+                    const item = btn.closest('.drag-item');
+                    const type = item.dataset.type;
+                    const targetPoolId = type === 'mon' ? 'pool-monitores' : 'pool-atiradores';
+                    const pool = document.getElementById(targetPoolId);
+                    
+                    if (pool) {
+                        const input = item.querySelector('.user-id-input');
+                        input.disabled = true;
+                        pool.appendChild(item);
+                        
+                        // Atualizar placeholders
+                        document.querySelectorAll('.drop-slot').forEach(slot => {
+                            checkPlaceholder(slot);
+                        });
+                    }
+                };
 
                 function checkPlaceholder(slot) {
                     const placeholder = slot.querySelector('.slot-placeholder');

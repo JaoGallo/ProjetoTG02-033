@@ -12,7 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE escala_config MODIFY COLUMN grupo VARCHAR(255) NOT NULL");
+        Schema::table('escala_config', function (Blueprint $table) {
+            $table->string('grupo', 255)->change();
+        });
     }
 
     /**
@@ -20,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE escala_config MODIFY COLUMN grupo ENUM('Mon', 'Atdr') NOT NULL");
+        Schema::table('escala_config', function (Blueprint $table) {
+            $table->enum('grupo', ['Mon', 'Atdr'])->change();
+        });
     }
 };

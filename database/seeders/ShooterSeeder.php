@@ -15,7 +15,29 @@ class ShooterSeeder extends Seeder
     public function run(): void
     {
         // 1. Apagar atiradores e monitores existentes
-        User::whereIn('role', ['atirador', 'monitor'])->delete();
+        User::whereIn('role', ['atirador', 'monitor', 'master', 'instructor'])->delete();
+
+        // Criar Usuário Mestre (Administrador)
+        User::create([
+            'name' => 'ADMINISTRADOR',
+            'ra' => '000',
+            'cpf' => '00000000000',
+            'role' => 'master',
+            'password' => Hash::make('Joaopaulo100'),
+        ]);
+
+        // Criar usuário Instrutor (Subtenente Julio César)
+        User::create([
+            'name' => 'Subtenente Julio César',
+            'nome_de_guerra' => 'JULIO CÉSAR',
+            'numero' => 0,
+            'ra' => '02033',
+            'cpf' => '00000002033',
+            'role' => 'instructor',
+            'is_cfc' => true,
+            'turma' => 2025,
+            'password' => Hash::make('Tg02033'),
+        ]);
 
         $faker = Faker::create('pt_BR');
         $usedWarNames = [];

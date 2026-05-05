@@ -26,13 +26,21 @@ class EscalaController extends Controller
         return view('escalas.index', compact('adts'));
     }
 
-    public function criarAdt()
+    public function criarAdt(Request $request)
     {
-        $turma = config('tg.turma_ativa');
-        $monitores = User::where('is_cfc', true)->where('role', 'atirador')->where('turma', $turma)->orderBy('numero')->get();
-        $atiradores = User::where('is_cfc', false)->where('role', 'atirador')->where('turma', $turma)->orderBy('numero')->get();
+        $turma = (int) $request->get('turma', config('tg.turma_ativa', date('Y')));
+        $monitores = User::where('is_cfc', true)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
+        $atiradores = User::where('is_cfc', false)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
         
-        return view('escalas.criar_adt', compact('monitores', 'atiradores'));
+        $anosNoBanco = User::whereNotNull('turma')->distinct()->pluck('turma')->toArray();
+        $anoAtual = (int)date('Y');
+        $anosPadrao = [$anoAtual - 1, $anoAtual];
+        $turmasDisponiveis = collect(array_merge($anosNoBanco, $anosPadrao))
+            ->unique()
+            ->filter(fn($y) => $y <= $anoAtual)
+            ->sortDesc();
+        
+        return view('escalas.criar_adt', compact('monitores', 'atiradores', 'turmasDisponiveis', 'turma'));
     }
 
     public function salvarAdt(Request $request)
@@ -91,9 +99,17 @@ class EscalaController extends Controller
 
     public function edit(EscalaConfig $config, Request $request)
     {
-        $turma = config('tg.turma_ativa');
-        $monitores = User::where('is_cfc', true)->where('role', 'atirador')->where('turma', $turma)->orderBy('numero')->get();
-        $atiradores = User::where('is_cfc', false)->where('role', 'atirador')->where('turma', $turma)->orderBy('numero')->get();
+        $turma = (int) $request->get('turma', config('tg.turma_ativa', date('Y')));
+        $monitores = User::where('is_cfc', true)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
+        $atiradores = User::where('is_cfc', false)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
+
+        $anosNoBanco = User::whereNotNull('turma')->distinct()->pluck('turma')->toArray();
+        $anoAtual = (int)date('Y');
+        $anosPadrao = [$anoAtual - 1, $anoAtual];
+        $turmasDisponiveis = collect(array_merge($anosNoBanco, $anosPadrao))
+            ->unique()
+            ->filter(fn($y) => $y <= $anoAtual)
+            ->sortDesc();
 
         $registros = EscalaDiaria::where('escala_config_id', $config->id)
             ->get()
@@ -116,7 +132,7 @@ class EscalaController extends Controller
             $selectedDate = $config->data_inicio->toDateString();
         }
 
-        return view('escalas.editar_adt', compact('config', 'monitores', 'atiradores', 'diasAdt', 'selectedDate'));
+        return view('escalas.editar_adt', compact('config', 'monitores', 'atiradores', 'diasAdt', 'selectedDate', 'turmasDisponiveis', 'turma'));
     }
 
     public function update(Request $request, EscalaConfig $config)
