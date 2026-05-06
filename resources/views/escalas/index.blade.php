@@ -46,13 +46,13 @@
             </div>
 
             <div class="adt-actions">
-                @if(!$adt->data_fim->isPast() && in_array(Auth::user()->role, ['master', 'instructor']))
+                @if(in_array(Auth::user()->role, ['master', 'instructor']))
                     <a href="{{ route('escalas.edit', $adt->id) }}" title="Editar Aditamento" style="color: #3b82f6;">
                         <i class="fa-solid fa-pencil"></i>
                     </a>
                 @endif
                 
-                @if(in_array(Auth::user()->role, ['master', 'instructor']) && ($adt->data_inicio->isFuture() || (auth()->check() && auth()->user()->role === 'master')))
+                @if(in_array(Auth::user()->role, ['master', 'instructor']))
                     <form action="{{ route('escalas.destroy', $adt->id) }}" method="POST" style="display:inline;" class="delete-adt-form">
                         @csrf
                         @method('DELETE')
