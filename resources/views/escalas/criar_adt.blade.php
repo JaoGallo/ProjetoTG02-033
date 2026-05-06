@@ -79,6 +79,19 @@
                                         data-nome="{{ strtolower($mon->nome_de_guerra) }}" data-numero="{{ $mon->numero }}">
                                         <span class="nr">{{ $mon->numero }}</span>
                                         <span class="nome">{{ $mon->nome_de_guerra }}</span>
+                                        
+                                        @php
+                                            $folga = $mon->folga_dias;
+                                            $color = '#ef4444'; 
+                                            if ($folga >= 7) $color = '#f59e0b'; 
+                                            if ($folga >= 14) $color = '#10b981'; 
+                                            if ($folga == 999) $color = '#6366f1'; 
+                                            if ($folga == -1) $color = '#10b981'; 
+                                        @endphp
+                                        <span class="folga-badge" style="background: {{ $color }};" title="{{ $folga == -1 ? 'Próximo' : 'Último' }} serviço: {{ $mon->ultima_escala }}">
+                                            @if($folga == 999) Novo @elseif($folga == -1) Escalado @else {{ $folga }}d @endif
+                                        </span>
+
                                         <button type="button" class="remove-item-btn" onclick="removeItem(this)">
                                             <i class="fa-solid fa-xmark"></i>
                                         </button>
@@ -103,6 +116,19 @@
                                         data-nome="{{ strtolower($atdr->nome_de_guerra) }}" data-numero="{{ $atdr->numero }}">
                                         <span class="nr">{{ $atdr->numero }}</span>
                                         <span class="nome">{{ $atdr->nome_de_guerra }}</span>
+
+                                        @php
+                                            $folga = $atdr->folga_dias;
+                                            $color = '#ef4444'; 
+                                            if ($folga >= 7) $color = '#f59e0b'; 
+                                            if ($folga >= 14) $color = '#10b981'; 
+                                            if ($folga == 999) $color = '#6366f1'; 
+                                            if ($folga == -1) $color = '#10b981';
+                                        @endphp
+                                        <span class="folga-badge" style="background: {{ $color }};" title="{{ $folga == -1 ? 'Próximo' : 'Último' }} serviço: {{ $atdr->ultima_escala }}">
+                                            @if($folga == 999) Novo @elseif($folga == -1) Escalado @else {{ $folga }}d @endif
+                                        </span>
+
                                         <button type="button" class="remove-item-btn" onclick="removeItem(this)">
                                             <i class="fa-solid fa-xmark"></i>
                                         </button>
@@ -459,6 +485,23 @@
 
         .drop-slot .drag-item .remove-item-btn {
             display: flex;
+        }
+
+        .folga-badge {
+            margin-left: auto;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            min-width: 35px;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .drop-slot .folga-badge {
+            display: none; /* Esconde a folga quando já está na escala para não poluir */
         }
     </style>
 

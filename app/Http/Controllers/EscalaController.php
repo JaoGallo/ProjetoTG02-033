@@ -32,6 +32,9 @@ class EscalaController extends Controller
         $monitores = User::where('is_cfc', true)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
         $atiradores = User::where('is_cfc', false)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
         
+        $this->attachFolga($monitores);
+        $this->attachFolga($atiradores);
+
         $anosNoBanco = User::whereNotNull('turma')->distinct()->pluck('turma')->toArray();
         $anoAtual = (int)date('Y');
         $anosPadrao = [$anoAtual - 1, $anoAtual];
@@ -102,6 +105,9 @@ class EscalaController extends Controller
         $turma = (int) $request->get('turma', config('tg.turma_ativa', date('Y')));
         $monitores = User::where('is_cfc', true)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
         $atiradores = User::where('is_cfc', false)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
+
+        $this->attachFolga($monitores);
+        $this->attachFolga($atiradores);
 
         $anosNoBanco = User::whereNotNull('turma')->distinct()->pluck('turma')->toArray();
         $anoAtual = (int)date('Y');
@@ -425,5 +431,37 @@ class EscalaController extends Controller
             DB::rollBack();
             return back()->withErrors(['error' => 'Falha ao realizar troca: ' . $e->getMessage()]);
         }
+    }
+
+    private function attachFolga($users)
+    {
+        if ($users->isEmpty()) return $users;
+
+        $userIds = $users->pluck('id');
+        $historico = DB::table('escala_diaria')
+            ->select('user_id', DB::raw('MAX(data) as last_date'))
+            ->whereIn('user_id', $userIds)
+            ->groupBy('user_id')
+            ->pluck('last_date', 'user_id')
+            ->toArray();
+
+        $now = now();
+        foreach ($users as $user) {
+            if (isset($historico[$user->id])) {
+                $lastDate = Carbon::parse($historico[$user->id]);
+                
+                if ($lastDate->isFuture()) {
+                    $user->folga_dias = -1; // Flag para "Escalado no futuro"
+                    $user->ultima_escala = $lastDate->format('d/m/Y');
+                } else {
+                    $user->folga_dias = (int) $lastDate->diffInDays($now);
+                    $user->ultima_escala = $lastDate->format('d/m/Y');
+                }
+            } else {
+                $user->folga_dias = 999; 
+                $user->ultima_escala = 'Nunca';
+            }
+        }
+        return $users;
     }
 }
