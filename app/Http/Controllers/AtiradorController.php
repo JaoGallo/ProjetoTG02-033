@@ -98,6 +98,14 @@ class AtiradorController extends Controller
         $user->is_cfc = !$user->is_cfc;
         $user->save();
 
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true, 
+                'is_cfc' => (bool)$user->is_cfc,
+                'message' => 'Status de CFC atualizado.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Status de CFC atualizado.');
     }
 
