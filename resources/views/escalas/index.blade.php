@@ -62,7 +62,7 @@
                     </form>
                 @endif
 
-                <a href="{{ route('escalas.pdf', $adt->data_inicio->format('Y-m-d')) }}" title="Gerar PDF" style="color: #10b981;">
+                <a href="{{ route('escalas.aditamento_pdf', $adt->id) }}" title="Gerar Aditamento PDF" style="color: #10b981;">
                     <i class="fa-solid fa-file-pdf"></i>
                 </a>
             </div>

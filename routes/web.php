@@ -57,6 +57,7 @@ Route::middleware(['auth', 'first_access'])->group(function () {
     // Boletim — acessível a todos autenticados
     Route::get('/escalas/boletim/{data}', [EscalaController::class, 'boletim'])->name('escalas.boletim');
     Route::get('/escalas/boletim/{data}/pdf', [EscalaController::class, 'exportarPdf'])->name('escalas.pdf');
+    Route::get('/escalas/aditamento/{config}/pdf', [EscalaController::class, 'exportarAditamentoPdf'])->name('escalas.aditamento_pdf');
 
     // Aviso — visualização para todos autenticados
     Route::get('/avisos/{aviso}', [\App\Http\Controllers\AnnouncementController::class, 'show'])->name('avisos.show');

@@ -354,6 +354,38 @@ class EscalaController extends Controller
         return $pdf->download($filename);
     }
 
+    public function exportarAditamentoPdf(EscalaConfig $config)
+    {
+        $registros = EscalaDiaria::with('user')
+            ->where('escala_config_id', $config->id)
+            ->whereIn('funcao', ['comandante', 'guarda'])
+            ->get();
+
+        $dias = [];
+        $dataAtual = $config->data_inicio->copy();
+        while ($dataAtual->lte($config->data_fim)) {
+            $dataStr = $dataAtual->toDateString();
+            $regsDia = $registros->where('data', $dataStr);
+            
+            $mon = $regsDia->filter(fn($r) => $r->user->is_cfc)->sortBy('user.numero')->values();
+            $atdr = $regsDia->filter(fn($r) => !$r->user->is_cfc)->sortBy('user.numero')->values();
+            
+            $dias[$dataStr] = [
+                'data' => $dataAtual->copy(),
+                'mon' => $mon,
+                'atdr' => $atdr,
+            ];
+            
+            $dataAtual->addDay();
+        }
+
+        $pdf = Pdf::loadView('escalas.aditamento_pdf', compact('config', 'dias'))
+                  ->setPaper('a4', 'portrait');
+
+        $filename = 'aditamento_' . \Illuminate\Support\Str::slug($config->nome) . '.pdf';
+        return $pdf->download($filename);
+    }
+
     // -----------------------------------------------------------------------
     // Feriados
     // -----------------------------------------------------------------------
