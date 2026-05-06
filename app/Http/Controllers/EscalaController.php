@@ -89,8 +89,8 @@ class EscalaController extends Controller
     // -----------------------------------------------------------------------
     public function destroy(EscalaConfig $config)
     {
-        $isMaster = auth()->check() && auth()->user()->role === 'master';
-        if (!$config->data_inicio->isFuture() && !$isMaster) {
+        $isAdmin = auth()->check() && in_array(auth()->user()->role, ['master', 'instructor']);
+        if (!$config->data_inicio->isFuture() && !$isAdmin) {
             return back()->withErrors(['error' => 'Apenas aditamentos futuros podem ser excluídos.']);
         }
         $config->delete(); 
@@ -144,8 +144,9 @@ class EscalaController extends Controller
         ]);
 
         $dataEdit = Carbon::parse($request->data_edit);
+        $isAdmin = auth()->check() && in_array(auth()->user()->role, ['master', 'instructor']);
 
-        if ($dataEdit->isPast() && !$dataEdit->isToday()) {
+        if ($dataEdit->isPast() && !$dataEdit->isToday() && !$isAdmin) {
             return back()->withErrors(['error' => 'Não é possível editar dias que já passaram.']);
         }
 
@@ -370,12 +371,20 @@ class EscalaController extends Controller
     // -----------------------------------------------------------------------
     public function swap(Request $request)
     {
-        $request->validate([
-            'data'                    => 'required|date|after_or_equal:today',
+        $isAdmin = auth()->check() && in_array(auth()->user()->role, ['master', 'instructor']);
+        
+        $rules = [
+            'data'                    => 'required|date',
             'integrante_origem_id'    => 'required|exists:users,id',
             'integrante_destino_id'   => 'required|exists:users,id|different:integrante_origem_id',
             'motivo'                  => 'nullable|string|max:500',
-        ]);
+        ];
+
+        if (!$isAdmin) {
+            $rules['data'] .= '|after_or_equal:today';
+        }
+
+        $request->validate($rules);
 
         $data    = $request->data;
         $idA     = $request->integrante_origem_id;
