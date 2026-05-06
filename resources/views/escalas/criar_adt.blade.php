@@ -37,7 +37,7 @@
 
                 <div class="input-group" style="width: 150px; margin-bottom: 0;">
                     <label style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.3rem;">Data de Início</label>
-                    <input type="date" name="data_inicio" value="{{ date('Y-m-d') }}" required style="padding: 0.5rem; font-size: 0.85rem; width: 100%; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <input type="date" name="data_inicio" id="data_inicio" value="{{ $dataRef }}" required style="padding: 0.5rem; font-size: 0.85rem; width: 100%; border-radius: 6px; border: 1px solid var(--border-color);">
                 </div>
 
                 <button type="button" id="btnSubmit" class="btn-primary" style="display: flex; align-items: center; gap: 0.5rem; height: 42px;">
@@ -528,6 +528,16 @@
                 turmaFilter.addEventListener('change', function() {
                     const currentUrl = new URL(window.location.href);
                     currentUrl.searchParams.set('turma', this.value);
+                    window.location.href = currentUrl.toString();
+                });
+            }
+
+            // Sincronizar Data de Início com a Folga
+            const dataInicioInput = document.getElementById('data_inicio');
+            if (dataInicioInput) {
+                dataInicioInput.addEventListener('change', function() {
+                    const currentUrl = new URL(window.location.href);
+                    currentUrl.searchParams.set('data_inicio', this.value);
                     window.location.href = currentUrl.toString();
                 });
             }

@@ -29,11 +29,18 @@ class EscalaController extends Controller
     public function criarAdt(Request $request)
     {
         $turma = (int) $request->get('turma', config('tg.turma_ativa', date('Y')));
+        
+        // Sugerir a próxima data baseada no último aditamento
+        $ultimoAdt = EscalaConfig::orderBy('data_fim', 'desc')->first();
+        $proximaDataSugerida = $ultimoAdt ? $ultimoAdt->data_fim->addDay()->toDateString() : date('Y-m-d');
+
+        $dataRef = $request->get('data_inicio', $proximaDataSugerida);
+
         $monitores = User::where('is_cfc', true)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
         $atiradores = User::where('is_cfc', false)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
         
-        $this->attachFolga($monitores);
-        $this->attachFolga($atiradores);
+        $this->attachFolga($monitores, $dataRef);
+        $this->attachFolga($atiradores, $dataRef);
 
         $anosNoBanco = User::whereNotNull('turma')->distinct()->pluck('turma')->toArray();
         $anoAtual = (int)date('Y');
@@ -43,7 +50,7 @@ class EscalaController extends Controller
             ->filter(fn($y) => $y <= $anoAtual)
             ->sortDesc();
         
-        return view('escalas.criar_adt', compact('monitores', 'atiradores', 'turmasDisponiveis', 'turma'));
+        return view('escalas.criar_adt', compact('monitores', 'atiradores', 'turmasDisponiveis', 'turma', 'dataRef'));
     }
 
     public function salvarAdt(Request $request)
@@ -103,11 +110,13 @@ class EscalaController extends Controller
     public function edit(EscalaConfig $config, Request $request)
     {
         $turma = (int) $request->get('turma', config('tg.turma_ativa', date('Y')));
+        $selectedDate = $request->get('dia', $config->data_inicio->toDateString());
+
         $monitores = User::where('is_cfc', true)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
         $atiradores = User::where('is_cfc', false)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
 
-        $this->attachFolga($monitores);
-        $this->attachFolga($atiradores);
+        $this->attachFolga($monitores, $selectedDate);
+        $this->attachFolga($atiradores, $selectedDate);
 
         $anosNoBanco = User::whereNotNull('turma')->distinct()->pluck('turma')->toArray();
         $anoAtual = (int)date('Y');
@@ -433,11 +442,13 @@ class EscalaController extends Controller
         }
     }
 
-    private function attachFolga($users)
+    private function attachFolga($users, $referenceDate = null)
     {
         if ($users->isEmpty()) return $users;
 
+        $ref = $referenceDate ? Carbon::parse($referenceDate) : now();
         $userIds = $users->pluck('id');
+        
         $historico = DB::table('escala_diaria')
             ->select('user_id', DB::raw('MAX(data) as last_date'))
             ->whereIn('user_id', $userIds)
@@ -445,16 +456,15 @@ class EscalaController extends Controller
             ->pluck('last_date', 'user_id')
             ->toArray();
 
-        $now = now();
         foreach ($users as $user) {
             if (isset($historico[$user->id])) {
                 $lastDate = Carbon::parse($historico[$user->id]);
                 
-                if ($lastDate->isFuture()) {
-                    $user->folga_dias = -1; // Flag para "Escalado no futuro"
+                if ($lastDate->gt($ref)) {
+                    $user->folga_dias = -1; // Escalado no futuro em relação à referência
                     $user->ultima_escala = $lastDate->format('d/m/Y');
                 } else {
-                    $user->folga_dias = (int) $lastDate->diffInDays($now);
+                    $user->folga_dias = (int) $lastDate->diffInDays($ref);
                     $user->ultima_escala = $lastDate->format('d/m/Y');
                 }
             } else {
