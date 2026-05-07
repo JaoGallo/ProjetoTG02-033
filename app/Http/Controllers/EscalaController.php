@@ -345,12 +345,45 @@ class EscalaController extends Controller
     public function exportarPdf(string $data)
     {
         $carbon = Carbon::parse($data);
-        $dados  = $this->escalaService->getBoletimDia($data);
+        
+        // Encontrar a EscalaConfig que contém essa data
+        $config = EscalaConfig::where('data_inicio', '<=', $carbon->toDateString())
+                              ->where('data_fim', '>=', $carbon->toDateString())
+                              ->first();
+        
+        if (!$config) {
+            return back()->withErrors(['error' => 'Nenhuma escala encontrada para esta data.']);
+        }
+        
+        // Buscar todos os registros de escala do período
+        $registros = EscalaDiaria::with('user')
+            ->where('escala_config_id', $config->id)
+            ->whereIn('funcao', ['comandante', 'guarda'])
+            ->get();
 
-        $pdf = Pdf::loadView('escalas.boletim_pdf', compact('dados', 'carbon'))
+        // Organizar dados por dia
+        $dias = [];
+        $dataAtual = $config->data_inicio->copy();
+        while ($dataAtual->lte($config->data_fim)) {
+            $dataStr = $dataAtual->toDateString();
+            $regsDia = $registros->where('data', $dataStr);
+            
+            $mon = $regsDia->filter(fn($r) => $r->user->is_cfc)->sortBy('user.numero')->values();
+            $atdr = $regsDia->filter(fn($r) => !$r->user->is_cfc)->sortBy('user.numero')->values();
+            
+            $dias[$dataStr] = [
+                'data' => $dataAtual->copy(),
+                'mon' => $mon,
+                'atdr' => $atdr,
+            ];
+            
+            $dataAtual->addDay();
+        }
+
+        $pdf = Pdf::loadView('escalas.boletim_pdf', compact('config', 'dias', 'carbon'))
                   ->setPaper('a4', 'portrait');
 
-        $filename = 'boletim_' . $carbon->format('d-m-Y') . '.pdf';
+        $filename = 'aditamento_' . \Illuminate\Support\Str::slug($config->nome) . '.pdf';
         return $pdf->download($filename);
     }
 
