@@ -340,7 +340,12 @@ class EscalaController extends Controller
     {
         $carbon = Carbon::parse($data);
         $dados  = $this->escalaService->getBoletimDia($data);
-        return view('escalas.boletim', compact('dados', 'carbon'));
+        
+        $config = EscalaConfig::where('data_inicio', '<=', $data)
+                              ->where('data_fim', '>=', $data)
+                              ->first();
+
+        return view('escalas.boletim', compact('dados', 'carbon', 'config'));
     }
 
     public function exportarPdf(string $data)
@@ -372,8 +377,8 @@ class EscalaController extends Controller
             $dataStr = $dataAtual->toDateString();
             $regsDia = $registrosGrupados->get($dataStr, collect());
             
-            $mon = $regsDia->filter(fn($r) => $r->user->is_cfc)->sortBy('user.numero')->values();
-            $atdr = $regsDia->filter(fn($r) => !$r->user->is_cfc)->sortBy('user.numero')->values();
+            $mon = $regsDia->filter(fn($r) => $r->funcao === 'comandante')->sortBy('user.numero')->values();
+            $atdr = $regsDia->filter(fn($r) => $r->funcao === 'guarda')->sortBy('user.numero')->values();
             
             $dias[$dataStr] = [
                 'data' => $dataAtual->copy(),
@@ -408,8 +413,8 @@ class EscalaController extends Controller
             $dataStr = $dataAtual->toDateString();
             $regsDia = $registrosGrupados->get($dataStr, collect());
             
-            $mon = $regsDia->filter(fn($r) => $r->user->is_cfc)->sortBy('user.numero')->values();
-            $atdr = $regsDia->filter(fn($r) => !$r->user->is_cfc)->sortBy('user.numero')->values();
+            $mon = $regsDia->filter(fn($r) => $r->funcao === 'comandante')->sortBy('user.numero')->values();
+            $atdr = $regsDia->filter(fn($r) => $r->funcao === 'guarda')->sortBy('user.numero')->values();
             
             $dias[$dataStr] = [
                 'data' => $dataAtual->copy(),

@@ -16,16 +16,21 @@
         </div>
         
         <div>
-            <a href="{{ route('escalas.pdf', $carbon->format('Y-m-d')) }}" class="btn-primary" style="background: #ef4444;">
-                <i class="fa-solid fa-file-pdf"></i> Exportar PDF
-            </a>
+            @if($config)
+                <a href="{{ route('escalas.aditamento_pdf', $config->id) }}" class="btn-primary" style="background: #ef4444;">
+                    <i class="fa-solid fa-file-pdf"></i> Exportar Aditamento Completo (PDF)
+                </a>
+            @else
+                <a href="{{ route('escalas.pdf', $carbon->format('Y-m-d')) }}" class="btn-primary" style="background: #ef4444;">
+                    <i class="fa-solid fa-file-pdf"></i> Exportar PDF do Dia
+                </a>
+            @endif
         </div>
     </div>
 
     <div class="profile-card" style="padding: 3rem;">
         <div class="boletim-header">
             <h3 style="margin: 0; text-transform: uppercase; letter-spacing: 1px;">Escala de Serviço para o dia {{ $carbon->format('d/m/Y') }}</h3>
-            <p style="margin: 10px 0 0 0; font-weight: 700; color: var(--primary-olive-dark);">ORDEM DE SERVIÇO Nº ______ / {{ $carbon->year }}</p>
         </div>
 
         <table class="boletim-table">
@@ -73,11 +78,7 @@
             </tbody>
         </table>
 
-        <div style="margin-top: 4rem; text-align: center;">
-            <div style="height: 1px; width: 250px; background: #000; margin: 0 auto 10px auto;"></div>
-            <p style="margin: 0; font-weight: 700; text-transform: uppercase; font-size: 0.8rem;">Instrutor de Dia</p>
-            <p style="margin: 0; font-size: 0.75rem; color: var(--text-secondary);">Tiro de Guerra 02-033</p>
-        </div>
+
     </div>
 </div>
 @endsection

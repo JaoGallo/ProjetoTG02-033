@@ -129,8 +129,8 @@ class EscalaService
             ->get()
             ->sortBy(fn($r) => [$r->funcao === 'guarda' ? 1 : 0, $r->user->numero]);
 
-        $mon  = $registros->filter(fn($r) => $r->user->is_cfc)->values();
-        $atdr = $registros->filter(fn($r) => !$r->user->is_cfc)->values();
+        $mon  = $registros->filter(fn($r) => $r->funcao === 'comandante')->values();
+        $atdr = $registros->filter(fn($r) => $r->funcao === 'guarda')->values();
 
         return [
             'data'   => Carbon::parse($data),
