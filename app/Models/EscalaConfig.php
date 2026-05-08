@@ -23,6 +23,7 @@ class EscalaConfig extends Model
         'part2_instrucao',
         'part3_assuntos_gerais',
         'part4_justica_disciplina',
+        'user_id',
     ];
 
     protected $casts = [
@@ -34,6 +35,11 @@ class EscalaConfig extends Model
     public function escalaDiaria(): HasMany
     {
         return $this->hasMany(EscalaDiaria::class, 'escala_config_id');
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

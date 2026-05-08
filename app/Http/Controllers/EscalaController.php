@@ -81,6 +81,7 @@ class EscalaController extends Controller
                 'part2_instrucao' => $request->part2_instrucao,
                 'part3_assuntos_gerais' => $request->part3_assuntos_gerais,
                 'part4_justica_disciplina' => $request->part4_justica_disciplina,
+                'user_id' => auth()->id(),
             ]);
 
             $this->escalaService->gerarAditamentoCompleto($config, $request->dia1_monitores, $request->dia1_atiradores);
@@ -361,12 +362,15 @@ class EscalaController extends Controller
             ->whereIn('funcao', ['comandante', 'guarda'])
             ->get();
 
+        // Agrupar registros por data (string) para facilitar a busca no loop
+        $registrosGrupados = $registros->groupBy(fn($r) => $r->data->toDateString());
+
         // Organizar dados por dia
         $dias = [];
         $dataAtual = $config->data_inicio->copy();
         while ($dataAtual->lte($config->data_fim)) {
             $dataStr = $dataAtual->toDateString();
-            $regsDia = $registros->where('data', $dataStr);
+            $regsDia = $registrosGrupados->get($dataStr, collect());
             
             $mon = $regsDia->filter(fn($r) => $r->user->is_cfc)->sortBy('user.numero')->values();
             $atdr = $regsDia->filter(fn($r) => !$r->user->is_cfc)->sortBy('user.numero')->values();
@@ -389,16 +393,20 @@ class EscalaController extends Controller
 
     public function exportarAditamentoPdf(EscalaConfig $config)
     {
+        $config->load('creator');
         $registros = EscalaDiaria::with('user')
             ->where('escala_config_id', $config->id)
             ->whereIn('funcao', ['comandante', 'guarda'])
             ->get();
 
+        // Agrupar registros por data (string)
+        $registrosGrupados = $registros->groupBy(fn($r) => $r->data->toDateString());
+
         $dias = [];
         $dataAtual = $config->data_inicio->copy();
         while ($dataAtual->lte($config->data_fim)) {
             $dataStr = $dataAtual->toDateString();
-            $regsDia = $registros->where('data', $dataStr);
+            $regsDia = $registrosGrupados->get($dataStr, collect());
             
             $mon = $regsDia->filter(fn($r) => $r->user->is_cfc)->sortBy('user.numero')->values();
             $atdr = $regsDia->filter(fn($r) => !$r->user->is_cfc)->sortBy('user.numero')->values();

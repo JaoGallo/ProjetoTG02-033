@@ -4,101 +4,146 @@
     <meta charset="utf-8">
     <title>{{ $config->nome }}</title>
     <style>
+        @page {
+            margin: 1.0cm 2.5cm 1.0cm 2.5cm;
+        }
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 11pt;
-            line-height: 1.3;
+            font-size: 8pt;
+            line-height: 1.2;
             color: #000;
-            margin: 2cm;
+            margin: 0;
+            padding: 0;
         }
         .header {
             text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        .header .logo {
+            width: 55px;
+            height: auto;
+            margin-bottom: 5px;
         }
         .header p {
             margin: 0;
             padding: 0;
+            font-weight: bold;
+            font-size: 9pt;
         }
         .aditamento-title {
             text-align: center;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 12px 0;
             text-decoration: underline;
             text-transform: uppercase;
+            font-size: 10pt;
         }
         .intro-text {
-            text-align: justify;
-            text-indent: 2cm;
-            margin-bottom: 20px;
+            text-align: center;
+            margin-bottom: 12px;
         }
         .parte-title {
             text-align: center;
             font-weight: bold;
-            margin: 20px 0 10px 0;
+            margin: 15px 0 8px 0;
             text-transform: uppercase;
+            font-size: 9pt;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+        }
+        .escala-container {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
         }
         .escala-date {
             font-weight: bold;
             text-decoration: underline;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
             text-transform: uppercase;
-            font-size: 10pt;
+            font-size: 8pt;
+            display: block;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
-            font-size: 10pt;
+            margin-bottom: 12px;
+            font-size: 8pt;
         }
         table, th, td {
             border: 1px solid #000;
         }
         th, td {
-            padding: 4px 8px;
+            padding: 3px 6px;
             text-align: center;
+            vertical-align: middle;
         }
         th {
             font-weight: bold;
             background-color: #f2f2f2;
             text-transform: uppercase;
         }
-        td.align-left {
-            text-align: left;
+        td.funcao-col {
+            font-weight: bold;
+            width: 25%;
+        }
+        td.nr-col {
+            width: 25%;
+        }
+        td.nome-col {
+            text-align: center;
+            font-weight: bold;
+            width: 50%;
         }
         .footer {
-            margin-top: 60px;
+            margin-top: 40px;
             text-align: center;
             page-break-inside: avoid;
         }
         .signature-line {
-            width: 300px;
-            border-top: 1px solid #000;
+            width: 250px;
+            border-top: 1.5px solid #000;
             margin: 0 auto 5px auto;
+        }
+        .signature-name {
+            font-weight: bold;
+            font-size: 9pt;
+            text-transform: uppercase;
+        }
+        .signature-rank {
+            font-size: 8pt;
+        }
+        .signature-date {
+            margin-top: 8px;
+            font-size: 8pt;
+            font-style: italic;
         }
         .watermark {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 80pt;
-            color: rgba(0, 0, 0, 0.04);
+            font-size: 70pt;
+            color: rgba(0, 0, 0, 0.02);
             z-index: -1;
             white-space: nowrap;
         }
         .part-content {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: justify;
+            text-indent: 1.5cm;
             white-space: pre-wrap;
         }
         .part-content-empty {
             font-style: italic;
-            color: #555;
+            color: #444;
             text-align: center;
-            margin-bottom: 20px;
+            margin: 8px 0;
         }
-        .page-break {
-            page-break-before: always;
+        .empty-table-msg {
+            text-align: center;
+            font-style: italic;
+            padding: 6px;
         }
     </style>
 </head>
@@ -106,6 +151,7 @@
     <div class="watermark">TG 02-033</div>
 
     <div class="header">
+        <img src="{{ public_path('AdtLogo.png') }}" class="logo">
         <p>MINISTÉRIO DA DEFESA</p>
         <p>EXÉRCITO BRASILEIRO</p>
         <p>CMSE - CMDO 2ª RM</p>
@@ -126,42 +172,52 @@
     </div>
 
     @foreach($dias as $dia)
-    <div class="escala-date" style="page-break-inside: avoid;">
-        ESCALA DE SERVIÇO PARA O DIA {{ $dia['data']->format('d') }} de {{ strtoupper($dia['data']->translatedFormat('F')) }} DE {{ $dia['data']->format('Y') }} ({{ strtoupper($dia['data']->translatedFormat('l')) }})
+    <div class="escala-container">
+        <span class="escala-date">
+            ESCALA DE SERVIÇO PARA O DIA {{ $dia['data']->format('d') }} de {{ strtoupper($dia['data']->translatedFormat('F')) }} DE {{ $dia['data']->format('Y') }} ({{ strtoupper($dia['data']->translatedFormat('l')) }})
+        </span>
+
+        @if($dia['mon']->isEmpty() && $dia['atdr']->isEmpty())
+            <div class="empty-table-msg">Sem serviço escalado para esta data.</div>
+        @else
+            <table>
+                <thead>
+                    <tr>
+                        <th>FUNÇÃO</th>
+                        <th>GRAD - NR</th>
+                        <th>NOME DE GUERRA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Comandantes -->
+                    @if($dia['mon']->isNotEmpty())
+                        @foreach($dia['mon'] as $idx => $reg)
+                        <tr>
+                            @if($idx === 0)
+                                <td rowspan="{{ count($dia['mon']) }}" class="funcao-col">Cmt Gd</td>
+                            @endif
+                            <td class="nr-col">MON - {{ str_pad($reg->user->numero, 2, '0', STR_PAD_LEFT) }}</td>
+                            <td class="nome-col">{{ mb_strtoupper($reg->user->nome_de_guerra ?? $reg->user->name, 'UTF-8') }}</td>
+                        </tr>
+                        @endforeach
+                    @endif
+
+                    <!-- Sentinelas -->
+                    @if($dia['atdr']->isNotEmpty())
+                        @foreach($dia['atdr'] as $idx => $reg)
+                        <tr>
+                            @if($idx === 0)
+                                <td rowspan="{{ count($dia['atdr']) }}" class="funcao-col">SENTINELAS</td>
+                            @endif
+                            <td class="nr-col">ATDR - {{ str_pad($reg->user->numero, 2, '0', STR_PAD_LEFT) }}</td>
+                            <td class="nome-col">{{ mb_strtoupper($reg->user->nome_de_guerra ?? $reg->user->name, 'UTF-8') }}</td>
+                        </tr>
+                        @endforeach
+                    @endif
+                </tbody>
+            </table>
+        @endif
     </div>
-
-    <table style="page-break-inside: avoid;">
-        <thead>
-            <tr>
-                <th style="width: 30%;">FUNÇÃO</th>
-                <th style="width: 25%;">Grad - Nr</th>
-                <th style="width: 45%;">NOME</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Comandantes -->
-            @foreach($dia['mon'] as $idx => $reg)
-            <tr>
-                @if($idx === 0)
-                    <td rowspan="{{ count($dia['mon']) }}" style="font-weight: bold;">Cmt Gd</td>
-                @endif
-                <td>Mon - {{ str_pad($reg->user->numero, 2, '0', STR_PAD_LEFT) }}</td>
-                <td style="font-weight: bold;">{{ mb_strtoupper($reg->user->nome_de_guerra, 'UTF-8') }}</td>
-            </tr>
-            @endforeach
-
-            <!-- Sentinelas -->
-            @foreach($dia['atdr'] as $idx => $reg)
-            <tr>
-                @if($idx === 0)
-                    <td rowspan="{{ count($dia['atdr']) }}" style="font-weight: bold;">Sentinelas</td>
-                @endif
-                <td>Atdr - {{ str_pad($reg->user->numero, 2, '0', STR_PAD_LEFT) }}</td>
-                <td style="font-weight: bold;">{{ mb_strtoupper($reg->user->nome_de_guerra, 'UTF-8') }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
     @endforeach
 
     <div class="parte-title">
@@ -185,7 +241,7 @@
     <div class="parte-title">
         4ª PARTE - JUSTIÇA E DISCIPLINA
     </div>
-    @if(!empty($config->part4_justica_disciplina))
+    @if(!empty(trim($config->part4_justica_disciplina ?? '')))
         <div class="part-content">{!! nl2br(e($config->part4_justica_disciplina)) !!}</div>
     @else
         <div class="part-content-empty">(Sem Alteração)</div>
@@ -193,8 +249,9 @@
 
     <div class="footer">
         <div class="signature-line"></div>
-        <div style="font-weight: bold;">Chefe da Instrução do TG 02-033</div>
-        <div style="font-size: 10pt; margin-top: 5px;">S. J. do Rio Preto - SP, {{ date('d') }} de {{ \Carbon\Carbon::now()->translatedFormat('F') }} de {{ date('Y') }}.</div>
+        <div class="signature-name">{{ $config->creator->name ?? 'Chefe da Instrução' }}</div>
+        <div class="signature-rank">Tiro de Guerra 02-033</div>
+        <div class="signature-date">S. J. do Rio Preto - SP, {{ date('d') }} de {{ \Carbon\Carbon::now()->translatedFormat('F') }} de {{ date('Y') }}.</div>
     </div>
 </body>
 </html>
