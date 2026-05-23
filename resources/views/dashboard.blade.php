@@ -3,7 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content')
-    <div class="welcome-section" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+    <div class="welcome-section" style="padding: 1.25rem; margin-bottom: 1rem;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <div class="dash-avatar" style="width: 60px; height: 60px;">
@@ -59,7 +59,7 @@
             display: flex;
             gap: 1.25rem;
             overflow-x: auto;
-            padding: 0.5rem 0.5rem 1rem 0.5rem;
+            padding: 0.5rem;
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -71,13 +71,14 @@
             display: none;
         }
 
+        /* Fluid sizing for carousel items */
         .carousel-item {
-            flex: 0 0 310px;
+            flex: 0 0 min(310px, 85vw);
             scroll-snap-align: start;
         }
 
         .carousel-item-large {
-            flex: 0 0 340px;
+            flex: 0 0 min(340px, 85vw);
             scroll-snap-align: start;
         }
 
@@ -88,9 +89,9 @@
             transform: translateY(-50%);
             width: 36px;
             height: 36px;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(4px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -99,18 +100,28 @@
             z-index: 10;
             color: var(--primary-olive);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .carousel-nav-btn:hover {
             background: var(--primary-olive);
             color: white;
             transform: translateY(-50%) scale(1.1);
-            box-shadow: 0 4px 12px rgba(67, 83, 52, 0.2);
+            box-shadow: 0 4px 12px rgba(67, 83, 52, 0.3);
         }
 
-        .carousel-nav-prev { left: -5px; }
-        .carousel-nav-next { right: -5px; }
+        .carousel-nav-prev { left: -10px; }
+        .carousel-nav-next { right: -10px; }
+
+        /* Media Queries for intermediate and smaller screens */
+        @media (max-width: 1400px) {
+            .carousel-item { flex: 0 0 calc(33.333% - 1rem); min-width: 280px; }
+            .carousel-item-large { flex: 0 0 calc(33.333% - 1rem); min-width: 300px; }
+        }
+
+        @media (max-width: 1100px) {
+            .carousel-item, .carousel-item-large { flex: 0 0 calc(50% - 1rem); }
+        }
 
         @media (max-width: 768px) {
             .carousel-item, .carousel-item-large {
@@ -132,8 +143,8 @@
     </script>
 
     <!-- Mural de Avisos -->
-    <div style="margin-bottom: 3rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <h2 style="font-weight: 800; color: var(--primary-olive-dark); margin: 0;">Mural Digital</h2>
                 <span style="font-size: 0.7rem; color: var(--text-secondary); background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-weight: 600;">{{ count($announcements) }} AVISOS</span>
@@ -162,7 +173,7 @@
                     
                     <div class="carousel-item">
                         <a href="{{ route('avisos.show', $aviso->id) }}" style="text-decoration: none; color: inherit; display: block; height: 100%;">
-                            <div class="stat-card" style="border-left: 4px solid {{ $aviso->priority ? '#ef4444' : $c['border'] }}; margin: 0; min-height: 150px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+                            <div class="stat-card" style="border-left: 4px solid {{ $aviso->priority ? '#ef4444' : $c['border'] }}; margin: 0; min-height: 120px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; padding: 0.85rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
                                 @if($isNew)
                                     <span style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 0 2px white;"></span>
                                 @endif
@@ -173,8 +184,8 @@
                                             {{ $aviso->category }}
                                         </span>
                                     </div>
-                                    <h4 style="margin: 0; font-size: 0.95rem; line-height: 1.4; font-weight: 700; color: var(--text-primary);">{{ $aviso->title }}</h4>
-                                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0.5rem 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.5;">
+                                    <h4 style="margin: 0; font-size: 0.9rem; line-height: 1.3; font-weight: 700; color: var(--text-primary);">{{ $aviso->title }}</h4>
+                                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0.3rem 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;">
                                         {{ $aviso->content }}
                                     </p>
                                 </div>
@@ -189,7 +200,7 @@
                         </a>
                     </div>
                 @empty
-                    <div style="width: 100%; background: #fff; padding: 2rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
+                    <div style="width: 100%; min-width: 100%; background: #fff; padding: 2rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
                         Sem avisos recentes para a sua turma.
                     </div>
                 @endforelse
@@ -198,8 +209,8 @@
     </div>
 
     <!-- Escalas e Serviços -->
-    <div style="margin-bottom: 2rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+    <div style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <h2 style="font-weight: 800; color: var(--primary-olive-dark); margin: 0; font-size: 1.25rem;">Escalas de Serviço</h2>
                 <span style="font-size: 0.65rem; color: var(--text-secondary); background: #f8fafc; border: 1px solid #f1f5f9; padding: 2px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase;">Geral</span>
@@ -219,7 +230,7 @@
                     @endphp
                     <div class="carousel-item-large">
                         <div class="stat-card" style="margin: 0; padding: 0; overflow: hidden; display: flex !important; flex-direction: column !important; align-items: stretch !important; border: 1px solid {{ $isToday ? 'var(--primary-olive)' : 'var(--border-color)' }}; {{ $isToday ? 'box-shadow: 0 4px 20px rgba(67, 83, 52, 0.08);' : 'box-shadow: 0 2px 10px rgba(0,0,0,0.03);' }}; border-radius: 10px; height: 100%; opacity: {{ $isPast ? '0.6' : '1' }}; background: white;">
-                            <div style="background: {{ $isToday ? 'var(--primary-olive)' : '#f8fafc' }}; padding: 0.6rem 0.75rem; border-bottom: 1px solid {{ $isToday ? 'var(--primary-olive)' : 'var(--border-color)' }}; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="background: {{ $isToday ? 'var(--primary-olive)' : '#f8fafc' }}; padding: 0.4rem 0.75rem; border-bottom: 1px solid {{ $isToday ? 'var(--primary-olive)' : 'var(--border-color)' }}; display: flex; justify-content: space-between; align-items: center;">
                                 <span style="font-weight: 800; color: {{ $isToday ? 'white' : '#64748b' }}; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;">
                                     {{ $dataCarbon->translatedFormat('d \d\e M') }} — {{ $dataCarbon->translatedFormat('D') }}
                                 </span>
@@ -228,13 +239,13 @@
                                 @endif
                             </div>
                             
-                            <div style="padding: 0.75rem; display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+                            <div style="padding: 0.6rem 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; flex: 1;">
                                 @foreach($servicos as $servico)
                                     @php
                                         $isMe = Auth::id() === $servico->user_id;
                                         $isCmt = $servico->funcao == 'comandante';
                                     @endphp
-                                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.35rem 0.5rem; border-radius: 6px; background: {{ $isMe ? 'var(--primary-olive-light)' : '#fcfcfc' }}; border: 1px solid {{ $isMe ? 'var(--primary-olive)' : '#f1f5f9' }};">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.25rem 0.5rem; border-radius: 6px; background: {{ $isMe ? 'var(--primary-olive-light)' : '#fcfcfc' }}; border: 1px solid {{ $isMe ? 'var(--primary-olive)' : '#f1f5f9' }};">
                                         <div style="display: flex; align-items: center; gap: 0.6rem;">
                                             <span style="font-size: 0.6rem; font-weight: 900; color: {{ $isCmt ? '#3b82f6' : '#22c55e' }}; text-transform: uppercase;">
                                                 {{ $isCmt ? 'Cmt' : 'Gd' }}
@@ -256,7 +267,7 @@
                         </div>
                     </div>
                 @empty
-                    <div style="width: 100%; background: #fff; padding: 3rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
+                    <div style="width: 100%; min-width: 100%; background: #fff; padding: 3rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
                         <i class="fa-solid fa-calendar-day" style="font-size: 2rem; opacity: 0.2; margin-bottom: 1rem; display: block;"></i>
                         Nenhuma escala publicada.
                     </div>

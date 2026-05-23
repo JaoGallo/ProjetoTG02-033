@@ -257,7 +257,8 @@ html.sidebar-collapsed-init .sidebar {
     margin-left: var(--sidebar-width);
     padding: 2rem;
     transition: margin-left var(--transition-speed) ease;
-    max-width: 100%;
+    width: 100%;
+    min-width: 0;
 }
 
 .main-content.full-width,
@@ -409,10 +410,31 @@ html.sidebar-collapsed-init .main-content {
 
 /* --- Media Queries --- */
 
+/* Laptops / Lower Res Desktops (Max 1366px) */
+@media (max-width: 1366px) {
+    :root {
+        --sidebar-width: 240px;
+    }
+    
+    .main-content {
+        padding: 1.25rem;
+    }
+    
+    .app-header {
+        margin: -1.25rem -1.25rem 1rem -1.25rem;
+        padding: 0 1.25rem;
+    }
+    
+    .welcome-section {
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+}
+
 /* Tablet & Smaller (Max 1024px) */
 @media (max-width: 1024px) {
     :root {
-        --sidebar-width: 240px;
+        --sidebar-width: 220px;
     }
 }
 
