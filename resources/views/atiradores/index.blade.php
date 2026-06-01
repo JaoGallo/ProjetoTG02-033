@@ -290,6 +290,9 @@
                 @endfor
             </select>
         </form>
+        <a href="{{ route('atiradores.template') }}" class="btn-import-header" style="background-color: #2d6a4f; text-decoration: none;">
+            <i class="fa-solid fa-file-arrow-down"></i> MODELO EXCEL
+        </a>
         <button class="btn-import-header" onclick="openImportModal()">
             <i class="fa-solid fa-file-excel"></i> IMPORTAR EXCEL
         </button>

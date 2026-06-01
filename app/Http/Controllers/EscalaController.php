@@ -23,7 +23,13 @@ class EscalaController extends Controller
     public function index()
     {
         $adts = EscalaConfig::orderBy('data_inicio', 'desc')->get();
-        return view('escalas.index', compact('adts'));
+
+        $turma = config('tg.turma_ativa', date('Y'));
+        $instrutores = User::whereIn('role', ['instructor', 'master'])->orderBy('name')->get();
+        $monitores = User::where('is_cfc', true)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
+        $atiradores = User::where('is_cfc', false)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
+
+        return view('escalas.index', compact('adts', 'instrutores', 'monitores', 'atiradores'));
     }
 
     public function criarAdt(Request $request)

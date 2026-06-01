@@ -33,11 +33,16 @@ Route::middleware(['auth', 'first_access'])->group(function () {
         Route::patch('/atiradores/{user}/toggle-cfc', [\App\Http\Controllers\AtiradorController::class, 'toggleCfc'])->name('atiradores.toggle-cfc');
         Route::delete('/atiradores/{user}', [\App\Http\Controllers\AtiradorController::class, 'destroy'])->name('atiradores.destroy');
         Route::post('/atiradores/import', [\App\Http\Controllers\AtiradorController::class, 'import'])->name('atiradores.import');
+        Route::get('/atiradores/modelo-excel', [\App\Http\Controllers\AtiradorController::class, 'exportTemplate'])->name('atiradores.template');
+
+        // Frequência
+        Route::get('/frequencia', [\App\Http\Controllers\InstrucaoController::class, 'index'])->name('frequencia.index');
+        Route::post('/frequencia', [\App\Http\Controllers\InstrucaoController::class, 'salvar'])->name('frequencia.salvar');
 
         // Gestão de Avisos
         Route::resource('avisos', \App\Http\Controllers\AnnouncementController::class)->except(['show', 'edit', 'update']);
 
-        // Sistema de Escalas (QTS) — Novo Fluxo de ADTs
+        // Sistema de Escalas e Serviços — Novo Fluxo de ADTs
         Route::get('/escalas/criar', [EscalaController::class, 'criarAdt'])->name('escalas.criar');
         Route::post('/escalas/criar', [EscalaController::class, 'salvarAdt'])->name('escalas.store');
 

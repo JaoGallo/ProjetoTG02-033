@@ -149,9 +149,6 @@
                 <h2 style="font-weight: 800; color: var(--primary-olive-dark); margin: 0;">Mural Digital</h2>
                 <span style="font-size: 0.7rem; color: var(--text-secondary); background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-weight: 600;">{{ count($announcements) }} AVISOS</span>
             </div>
-            @if(in_array(Auth::user()->role, ['master', 'instructor']))
-                <a href="{{ route('avisos.index') }}" class="badge" style="background: var(--primary-olive); color: white; text-decoration: none; padding: 6px 12px;">GERENCIAR</a>
-            @endif
         </div>
 
         <div class="carousel-wrapper">

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use App\Imports\AtiradoresImport;
+use App\Exports\AtiradoresTemplateExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AtiradorController extends Controller
@@ -128,5 +129,10 @@ class AtiradorController extends Controller
     {
         $user->delete();
         return redirect()->back()->with('success', 'Atirador removido.');
+    }
+
+    public function exportTemplate()
+    {
+        return Excel::download(new AtiradoresTemplateExport, 'modelo_atiradores.xlsx');
     }
 }

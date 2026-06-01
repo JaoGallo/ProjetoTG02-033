@@ -18,7 +18,7 @@
 
     <!-- Pre-render Sidebar State -->
     <script>
-        (function() {
+        (function () {
             const sidebarState = localStorage.getItem('sidebarState');
             if (sidebarState === 'collapsed' && window.innerWidth > 768) {
                 document.documentElement.classList.add('sidebar-collapsed-init');
@@ -41,23 +41,32 @@
             </div>
 
             <nav class="sidebar-nav">
-                <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}"
+                    class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     <i class="fa-solid fa-house"></i>
                     <span>Início</span>
                 </a>
                 @if(in_array(auth()->user()->role, ['master', 'instructor']))
-                <a href="{{ route('atiradores.index') }}" class="nav-item {{ request()->routeIs('atiradores.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-person-military-rifle"></i>
-                    <span>Atiradores</span>
-                </a>
+                    <a href="{{ route('atiradores.index') }}"
+                        class="nav-item {{ request()->routeIs('atiradores.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-person-military-rifle"></i>
+                        <span>Atiradores</span>
+                    </a>
+                    <a href="{{ route('avisos.index') }}"
+                        class="nav-item {{ request()->routeIs('avisos.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-bullhorn"></i>
+                        <span>Avisos</span>
+                    </a>
+                    <a href="{{ route('frequencia.index') }}"
+                        class="nav-item {{ request()->routeIs('frequencia.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <span>Frequência</span>
+                    </a>
                 @endif
-                <a href="{{ route('escalas.index') }}" class="nav-item {{ request()->routeIs('escalas.*') ? 'active' : '' }}">
+                <a href="{{ route('escalas.index') }}"
+                    class="nav-item {{ request()->routeIs('escalas.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-calendar-days"></i>
-                    <span>Escalas (QTS)</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fa-solid fa-users"></i>
-                    <span>Instruções</span>
+                    <span>Escalas e Serviços</span>
                 </a>
                 <a href="#" class="nav-item">
                     <i class="fa-solid fa-file-invoice"></i>
@@ -90,7 +99,8 @@
                 <button class="menu-toggle" id="menuToggle" title="Alternar Barra Lateral">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <div style="font-weight: 700; color: var(--primary-olive-dark); font-size: 1.1rem; letter-spacing: -0.5px;">
+                <div
+                    style="font-weight: 700; color: var(--primary-olive-dark); font-size: 1.1rem; letter-spacing: -0.5px;">
                     @yield('title', 'DASHBOARD')
                 </div>
                 <div style="display: flex; align-items: center; gap: 1rem;">
@@ -132,7 +142,7 @@
                 // Desktop behavior (Collapse)
                 sidebar.classList.toggle('collapsed');
                 mainContent.classList.toggle('full-width');
-                
+
                 // Save state
                 const isCollapsed = sidebar.classList.contains('collapsed');
                 localStorage.setItem('sidebarState', isCollapsed ? 'collapsed' : 'expanded');
