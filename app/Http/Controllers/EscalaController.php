@@ -20,16 +20,103 @@ class EscalaController extends Controller
     // -----------------------------------------------------------------------
     // Painel Geral
     // -----------------------------------------------------------------------
-    public function index()
+    public function index(Request $request)
     {
         $adts = EscalaConfig::orderBy('data_inicio', 'desc')->get();
 
-        $turma = config('tg.turma_ativa', date('Y'));
+        $turma = (int) $request->get('turma', config('tg.turma_ativa', date('Y')));
         $instrutores = User::whereIn('role', ['instructor', 'master'])->orderBy('name')->get();
         $monitores = User::where('is_cfc', true)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
         $atiradores = User::where('is_cfc', false)->whereIn('role', ['atirador', 'monitor'])->where('turma', $turma)->orderBy('numero')->get();
 
-        return view('escalas.index', compact('adts', 'instrutores', 'monitores', 'atiradores'));
+        $anosNoBanco = User::whereNotNull('turma')->distinct()->pluck('turma')->toArray();
+        $anoAtual = (int)date('Y');
+        $anosPadrao = [$anoAtual - 1, $anoAtual];
+        $turmasDisponiveis = collect(array_merge($anosNoBanco, $anosPadrao))
+            ->unique()
+            ->filter(fn($y) => $y <= $anoAtual)
+            ->sortDesc();
+
+        return view('escalas.index', compact('adts', 'instrutores', 'monitores', 'atiradores', 'turma', 'turmasDisponiveis'));
+    }
+
+    public function storeLote(Request $request)
+    {
+        $request->validate([
+            'nome' => 'required|string|max:100',
+            'lote_dados' => 'required|string'
+        ]);
+
+        try {
+            $dias = json_decode($request->lote_dados, true);
+            if (empty($dias)) {
+                return back()->withErrors(['error' => 'Nenhum dia selecionado para o aditamento.']);
+            }
+
+            // Ordenar por data
+            ksort($dias);
+            $datas = array_keys($dias);
+            $dataInicio = Carbon::parse($datas[0]);
+            $dataFim = Carbon::parse(end($datas));
+
+            DB::beginTransaction();
+
+            $config = EscalaConfig::create([
+                'nome' => $request->nome,
+                'grupo' => 'Unified',
+                'data_inicio' => $dataInicio,
+                'data_fim' => $dataFim,
+                'qnt_cmt_dia' => 0, // Será dinâmico pelo lote
+                'qnt_gd_dia' => 0,  // Será dinâmico pelo lote
+                'dias_iniciais' => 0,
+                'valor_inicial' => 1,
+                'status' => 'publicado',
+                'part2_instrucao' => $request->part2_instrucao,
+                'part3_assuntos_gerais' => $request->part3_assuntos_gerais,
+                'part4_justica_disciplina' => $request->part4_justica_disciplina,
+                'user_id' => auth()->id(),
+                'gerada_em' => now(), // Já gerada via lote
+            ]);
+
+            $batch = [];
+            $now = now();
+
+            foreach ($dias as $dateStr => $dadosDia) {
+                foreach ($dadosDia['cmt'] as $uid) {
+                    $batch[] = [
+                        'escala_config_id' => $config->id,
+                        'user_id' => $uid,
+                        'data' => $dateStr,
+                        'funcao' => 'comandante',
+                        'valor' => 'Cmt',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+                foreach ($dadosDia['gd'] as $uid) {
+                    $batch[] = [
+                        'escala_config_id' => $config->id,
+                        'user_id' => $uid,
+                        'data' => $dateStr,
+                        'funcao' => 'guarda',
+                        'valor' => 'Gd',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            }
+
+            if (!empty($batch)) {
+                DB::table('escala_diaria')->insert($batch);
+            }
+
+            DB::commit();
+            return redirect()->route('escalas.index')->with('success', 'Aditamento gerado com sucesso a partir da seleção!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Falha ao gerar aditamento: ' . $e->getMessage()]);
+        }
     }
 
     public function criarAdt(Request $request)

@@ -45,6 +45,7 @@ Route::middleware(['auth', 'first_access'])->group(function () {
         // Sistema de Escalas e Serviços — Novo Fluxo de ADTs
         Route::get('/escalas/criar', [EscalaController::class, 'criarAdt'])->name('escalas.criar');
         Route::post('/escalas/criar', [EscalaController::class, 'salvarAdt'])->name('escalas.store');
+        Route::post('/escalas/lote', [EscalaController::class, 'storeLote'])->name('escalas.storeLote');
 
         Route::get('/escalas/{config}/editar', [EscalaController::class, 'edit'])->name('escalas.edit');
         Route::put('/escalas/{config}', [EscalaController::class, 'update'])->name('escalas.update');
