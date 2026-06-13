@@ -2,43 +2,42 @@
 
 @section('title', 'Dashboard')
 
-@section('content')
-    <div class="welcome-section" style="padding: 1.25rem; margin-bottom: 1rem;">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <div class="dash-avatar" style="width: 60px; height: 60px;">
-                    @if(Auth::user()->photo)
-                        <img src="{{ asset('storage/' . Auth::user()->photo) }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
-                    @else
-                        <i class="fa-solid fa-user" style="font-size: 1.5rem;"></i>
-                    @endif
+@section('header-right')
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        @if(Auth::user()->role === 'atirador' || Auth::user()->role === 'monitor')
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <div style="text-align: right; border-right: 1px solid var(--border-color); padding-right: 1rem;">
+                    <span style="display: block; font-size: 0.6rem; color: var(--text-secondary); font-weight: 800; text-transform: uppercase;">Faltas</span>
+                    <span style="font-size: 1.1rem; font-weight: 800; color: var(--primary-olive-dark);">{{ Auth::user()->faults }}</span>
                 </div>
-                <div>
-                    <h2 style="margin: 0; font-size: 1.5rem;">{{ Auth::user()->name }}</h2>
-                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.25rem;">
-                        <span class="badge" style="font-size: 0.65rem; padding: 2px 8px;">{{ strtoupper(Auth::user()->role) }}</span>
-                        <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 600;">RA: {{ Auth::user()->ra }}</span>
-                    </div>
+                <div style="text-align: right; border-right: 1px solid var(--border-color); padding-right: 1rem;">
+                    <span style="display: block; font-size: 0.6rem; color: var(--text-secondary); font-weight: 800; text-transform: uppercase;">Pontos</span>
+                    <span style="font-size: 1.1rem; font-weight: 800; color: {{ Auth::user()->points >= 100 ? '#c53030' : 'var(--primary-olive-dark)' }};">
+                        {{ Auth::user()->points }}<small style="font-size: 0.65rem; opacity: 0.5;">/120</small>
+                    </span>
                 </div>
             </div>
-
-            @if(Auth::user()->role === 'atirador' || Auth::user()->role === 'monitor')
-                <div style="display: flex; gap: 1rem;">
-                    <div style="text-align: right; border-right: 1px solid var(--border-color); padding-right: 1rem;">
-                        <span style="display: block; font-size: 0.65rem; color: var(--text-secondary); font-weight: 800; text-transform: uppercase;">Faltas</span>
-                        <span style="font-size: 1.2rem; font-weight: 800; color: var(--primary-olive-dark);">{{ Auth::user()->faults }}</span>
-                    </div>
-                    <div style="text-align: right;">
-                        <span style="display: block; font-size: 0.65rem; color: var(--text-secondary); font-weight: 800; text-transform: uppercase;">Pontos</span>
-                        <span style="font-size: 1.2rem; font-weight: 800; color: {{ Auth::user()->points >= 100 ? '#c53030' : 'var(--primary-olive-dark)' }};">
-                            {{ Auth::user()->points }}<small style="font-size: 0.7rem; opacity: 0.5;">/120</small>
-                        </span>
-                    </div>
+        @endif
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div>
+                <h2 style="margin: 0; font-size: 0.95rem; line-height: 1.2; text-align: right;">{{ Auth::user()->name }}</h2>
+                <div style="display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end;">
+                    <span class="badge" style="font-size: 0.55rem; padding: 1px 6px;">{{ strtoupper(Auth::user()->role) }}</span>
+                    <span style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 600;">RA: {{ Auth::user()->ra }}</span>
                 </div>
-            @endif
+            </div>
+            <div class="dash-avatar" style="width: 40px; height: 40px;">
+                @if(Auth::user()->photo)
+                    <img src="{{ asset('storage/' . Auth::user()->photo) }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                @else
+                    <i class="fa-solid fa-user" style="font-size: 1rem;"></i>
+                @endif
+            </div>
         </div>
     </div>
+@endsection
 
+@section('content')
     <!-- Alerta de Proximidade do Limite -->
     @if(Auth::user()->points >= 100)
         <div class="alert alert-danger" style="margin-bottom: 2rem;">
@@ -142,71 +141,8 @@
         }
     </script>
 
-    <!-- Mural de Avisos -->
-    <div style="margin-bottom: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <h2 style="font-weight: 800; color: var(--primary-olive-dark); margin: 0;">Mural Digital</h2>
-                <span style="font-size: 0.7rem; color: var(--text-secondary); background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-weight: 600;">{{ count($announcements) }} AVISOS</span>
-            </div>
-        </div>
-
-        <div class="carousel-wrapper">
-            <button class="carousel-nav-btn carousel-nav-prev" onclick="scrollCarousel('carousel-avisos', -1)"><i class="fa-solid fa-chevron-left"></i></button>
-            <button class="carousel-nav-btn carousel-nav-next" onclick="scrollCarousel('carousel-avisos', 1)"><i class="fa-solid fa-chevron-right"></i></button>
-            
-            <div class="dashboard-carousel" id="carousel-avisos">
-                @forelse($announcements as $aviso)
-                    @php
-                        $colors = [
-                            'geral' => ['bg' => '#f3f4f6', 'text' => '#4b5563', 'border' => '#d1d5db'],
-                            'urgente' => ['bg' => '#fee2e2', 'text' => '#b91c1c', 'border' => '#f87171'],
-                            'escala' => ['bg' => '#eff6ff', 'text' => '#1e40af', 'border' => '#60a5fa'],
-                            'instrucao' => ['bg' => '#ecfdf5', 'text' => '#047857', 'border' => '#34d399'],
-                        ];
-                        $c = $colors[$aviso->category] ?? $colors['geral'];
-                        $isNew = !Auth::user()->instructor && !$aviso->readers()->where('user_id', Auth::id())->exists();
-                    @endphp
-                    
-                    <div class="carousel-item">
-                        <a href="{{ route('avisos.show', $aviso->id) }}" style="text-decoration: none; color: inherit; display: block; height: 100%;">
-                            <div class="stat-card" style="border-left: 4px solid {{ $aviso->priority ? '#ef4444' : $c['border'] }}; margin: 0; min-height: 120px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; padding: 0.85rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
-                                @if($isNew)
-                                    <span style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 0 2px white;"></span>
-                                @endif
-                                
-                                <div>
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-                                        <span style="font-size: 0.6rem; font-weight: 800; color: {{ $c['text'] }}; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7;">
-                                            {{ $aviso->category }}
-                                        </span>
-                                    </div>
-                                    <h4 style="margin: 0; font-size: 0.9rem; line-height: 1.3; font-weight: 700; color: var(--text-primary);">{{ $aviso->title }}</h4>
-                                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0.3rem 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;">
-                                        {{ $aviso->content }}
-                                    </p>
-                                </div>
-                                
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f8fafc; padding-top: 8px; margin-top: auto;">
-                                    <span style="font-size: 0.7rem; color: #adb5bd; font-weight: 600;">{{ $aviso->created_at->translatedFormat('d M') }}</span>
-                                    @if($aviso->attachment)
-                                        <i class="fa-solid fa-paperclip" style="color: #dee2e6; font-size: 0.75rem;"></i>
-                                    @endif
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                @empty
-                    <div style="width: 100%; min-width: 100%; background: #fff; padding: 2rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
-                        Sem avisos recentes para a sua turma.
-                    </div>
-                @endforelse
-            </div>
-        </div>
-    </div>
-
     <!-- Escalas e Serviços -->
-    <div style="margin-bottom: 1rem;">
+    <div style="margin-bottom: 1.5rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <h2 style="font-weight: 800; color: var(--primary-olive-dark); margin: 0; font-size: 1.25rem;">Escalas de Serviço</h2>
@@ -267,6 +203,69 @@
                     <div style="width: 100%; min-width: 100%; background: #fff; padding: 3rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
                         <i class="fa-solid fa-calendar-day" style="font-size: 2rem; opacity: 0.2; margin-bottom: 1rem; display: block;"></i>
                         Nenhuma escala publicada.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    <!-- Mural de Avisos -->
+    <div style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <h2 style="font-weight: 800; color: var(--primary-olive-dark); margin: 0;">Mural Digital</h2>
+                <span style="font-size: 0.7rem; color: var(--text-secondary); background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-weight: 600;">{{ count($announcements) }} AVISOS</span>
+            </div>
+        </div>
+
+        <div class="carousel-wrapper">
+            <button class="carousel-nav-btn carousel-nav-prev" onclick="scrollCarousel('carousel-avisos', -1)"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="carousel-nav-btn carousel-nav-next" onclick="scrollCarousel('carousel-avisos', 1)"><i class="fa-solid fa-chevron-right"></i></button>
+            
+            <div class="dashboard-carousel" id="carousel-avisos">
+                @forelse($announcements as $aviso)
+                    @php
+                        $colors = [
+                            'geral' => ['bg' => '#f3f4f6', 'text' => '#4b5563', 'border' => '#d1d5db'],
+                            'urgente' => ['bg' => '#fee2e2', 'text' => '#b91c1c', 'border' => '#f87171'],
+                            'escala' => ['bg' => '#eff6ff', 'text' => '#1e40af', 'border' => '#60a5fa'],
+                            'instrucao' => ['bg' => '#ecfdf5', 'text' => '#047857', 'border' => '#34d399'],
+                        ];
+                        $c = $colors[$aviso->category] ?? $colors['geral'];
+                        $isNew = !Auth::user()->instructor && !$aviso->readers()->where('user_id', Auth::id())->exists();
+                    @endphp
+                    
+                    <div class="carousel-item">
+                        <a href="{{ route('avisos.show', $aviso->id) }}" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                            <div class="stat-card" style="border-left: 4px solid {{ $aviso->priority ? '#ef4444' : $c['border'] }}; margin: 0; min-height: 120px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; padding: 0.85rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+                                @if($isNew)
+                                    <span style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 0 2px white;"></span>
+                                @endif
+                                
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                        <span style="font-size: 0.6rem; font-weight: 800; color: {{ $c['text'] }}; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7;">
+                                            {{ $aviso->category }}
+                                        </span>
+                                    </div>
+                                    <h4 style="margin: 0; font-size: 0.9rem; line-height: 1.3; font-weight: 700; color: var(--text-primary);">{{ $aviso->title }}</h4>
+                                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0.3rem 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;">
+                                        {{ $aviso->content }}
+                                    </p>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f8fafc; padding-top: 8px; margin-top: auto;">
+                                    <span style="font-size: 0.7rem; color: #adb5bd; font-weight: 600;">{{ $aviso->created_at->translatedFormat('d M') }}</span>
+                                    @if($aviso->attachment)
+                                        <i class="fa-solid fa-paperclip" style="color: #dee2e6; font-size: 0.75rem;"></i>
+                                    @endif
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                @empty
+                    <div style="width: 100%; min-width: 100%; background: #fff; padding: 2rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
+                        Sem avisos recentes para a sua turma.
                     </div>
                 @endforelse
             </div>

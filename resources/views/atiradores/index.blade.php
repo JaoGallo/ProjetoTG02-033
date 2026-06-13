@@ -251,6 +251,15 @@
         white-space: nowrap;
     }
 
+    .clickable-row {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .clickable-row:hover {
+        background-color: #f9fafb !important;
+    }
+
     @media (max-width: 768px) {
         .header-actions {
             flex-direction: column;
@@ -332,7 +341,7 @@
             </thead>
             <tbody>
                 @forelse($atiradores as $atirador)
-                <tr style="border-bottom: 1px solid #f3f4f6;">
+                <tr class="clickable-row" style="border-bottom: 1px solid #f3f4f6;" onclick="window.location='{{ route('frequencia.individual', $atirador->id) }}'">
                     <td class="col-shrink" style="padding: 15px 20px; font-weight: 600; color: #9ca3af;">{{ str_pad($atirador->numero, 2, '0', STR_PAD_LEFT) }}</td>
                     <td class="col-shrink" style="padding: 15px 20px;">
                         <div style="font-weight: 800; color: #111827;">{{ mb_strtoupper($atirador->nome_de_guerra) }}</div>
@@ -342,14 +351,14 @@
                         <div style="font-size: 0.8rem;"><strong>CPF:</strong> {{ $atirador->cpf }}</div>
                         <div style="font-size: 0.8rem;"><strong>RA:</strong> {{ $atirador->ra }}</div>
                     </td>
-                    <td class="col-shrink" style="padding: 15px 20px;">
+                    <td class="col-shrink" style="padding: 15px 20px;" onclick="event.stopPropagation();">
                         <button type="button" 
                                 onclick="toggleCfc(this, {{ $atirador->id }})" 
                                 class="cfc-badge {{ $atirador->is_cfc ? 'badge-active' : 'badge-inactive' }}">
                             {{ $atirador->is_cfc ? 'CFC ATIVO' : 'NÃO CFC' }}
                         </button>
                     </td>
-                    <td style="padding: 15px 20px; text-align: right; display: flex; justify-content: flex-end; gap: 8px;">
+                    <td style="padding: 15px 20px; text-align: right; display: flex; justify-content: flex-end; gap: 8px;" onclick="event.stopPropagation();">
                         <button onclick="openEditModal({{ json_encode($atirador) }})" class="btn-icon" style="background: #f3f4f6; color: #4b5563; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer;">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </button>

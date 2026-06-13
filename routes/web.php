@@ -36,6 +36,7 @@ Route::middleware(['auth', 'first_access'])->group(function () {
         Route::get('/atiradores/modelo-excel', [\App\Http\Controllers\AtiradorController::class, 'exportTemplate'])->name('atiradores.template');
 
         // Frequência
+        Route::get('/frequencia/atirador/{user}', [\App\Http\Controllers\InstrucaoController::class, 'showIndividual'])->name('frequencia.individual');
         Route::get('/frequencia', [\App\Http\Controllers\InstrucaoController::class, 'index'])->name('frequencia.index');
         Route::post('/frequencia', [\App\Http\Controllers\InstrucaoController::class, 'salvar'])->name('frequencia.salvar');
 

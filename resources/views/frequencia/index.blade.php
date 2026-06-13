@@ -69,6 +69,26 @@
             border-color: var(--primary-olive-light);
         }
 
+        /* Estilo para linhas clicáveis */
+        .frequencia-table-row {
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .frequencia-table-row:hover {
+            background-color: #f0f4f1 !important;
+        }
+
+        .frequencia-table-row-icon {
+            display: none;
+            margin-right: 0.5rem;
+            color: var(--primary-olive);
+        }
+
+        .frequencia-table-row:hover .frequencia-table-row-icon {
+            display: inline-block;
+        }
+
         /* Conteúdo vazio / placeholder */
         .frequencia-empty {
             background: white;
@@ -142,14 +162,8 @@
         </div>
 
         <div class="turma-selector">
-            <label for="turmaSelect">Turma:</label>
             <form action="{{ route('frequencia.index') }}" method="GET" id="turmaForm"
                 style="display:flex;gap:8px;align-items:center;">
-                <select name="turma" id="turmaSelect" class="turma-select" onchange="this.form.submit()">
-                    <option value="1" {{ $turma == '1' ? 'selected' : '' }}>1ª Turma</option>
-                    <option value="2" {{ $turma == '2' ? 'selected' : '' }}>2ª Turma</option>
-                </select>
-
                 <label for="anoSelect" style="font-weight:600;font-size:0.8rem;color:var(--text-secondary);">Ano:</label>
                 <select name="ano" id="anoSelect" class="turma-select" onchange="this.form.submit()">
                     @php
@@ -159,6 +173,12 @@
                     @for($y = $current; $y >= $start; $y--)
                         <option value="{{ $y }}" {{ (isset($ano) && $ano == $y) ? 'selected' : '' }}>{{ $y }}</option>
                     @endfor
+                </select>
+
+                <label for="turmaSelect">Turma:</label>
+                <select name="turma" id="turmaSelect" class="turma-select" onchange="this.form.submit()">
+                    <option value="1" {{ $turma == '1' ? 'selected' : '' }}>1ª Turma</option>
+                    <option value="2" {{ $turma == '2' ? 'selected' : '' }}>2ª Turma</option>
                 </select>
             </form>
         </div>
@@ -214,8 +234,13 @@
                             @php
                                 $u = $atiradores->get($i);
                             @endphp
-                            <tr style="border-bottom:1px solid #f1f3f1;height:26px;">
-                                <td style="padding:4px 6px;">{{ $i }}</td>
+                            <tr class="frequencia-table-row" @if($u) data-user-id="{{ $u->id }}" @endif style="border-bottom:1px solid #f1f3f1;height:26px;">
+                                <td style="padding:4px 6px;">
+                                    <span class="frequencia-table-row-icon" title="Ver frequência individual">
+                                        <i class="fa-solid fa-calendar-days"></i>
+                                    </span>
+                                    {{ $i }}
+                                </td>
                                 <td
                                     style="padding:4px 6px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                                     {{ $u ? $u->name : '-' }}
@@ -303,4 +328,20 @@
             </div>
         </form>
     </div>
+
+<script>
+    // Abrir frequência individual ao clicar na linha
+    document.querySelectorAll('.frequencia-table-row[data-user-id]').forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Não abrir se clicou em um input ou botão
+            if (e.target.closest('input, button, a')) return;
+
+            const userId = this.getAttribute('data-user-id');
+            if (userId) {
+                window.location.href = `/frequencia/atirador/${userId}`;
+            }
+        });
+    });
+</script>
+
 @endsection

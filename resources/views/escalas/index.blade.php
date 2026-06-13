@@ -37,7 +37,8 @@
     .escala-table thead th{position:sticky; top:0; background:var(--bg); z-index:2;}
     .escala-table th:first-child, .escala-table td:first-child{ text-align:left; position:sticky; left:0; background:white; z-index:4; min-width:120px;}
     .escala-table th:nth-child(2), .escala-table td:nth-child(2){ text-align:left; position:sticky; left:120px; background:white; z-index:3; min-width:200px;}
-    .escala-table .weekend-col{background:#fee2e2; color:#991b1b;}
+    .escala-table .weekend-col{background:#fee2e2; color:#991b1b; font-weight:600;}
+    .escala-table .weekday-col{background:#ffffff; color:#000000;}
     .escala-table .weekday-col.clickable{cursor:pointer;}
     .escala-table .holiday-col{background:#fde68a;}
     .escala-table td.assigned-gd{background:#dbeafe; color:#1d4ed8; font-weight:700;}
@@ -608,17 +609,35 @@ document.addEventListener('DOMContentLoaded', function(){
 
     function refreshTableCounters(table) {
         table.querySelectorAll('tbody tr').forEach(row => {
-            let count = 50;
+            let weekdayCount = 50;
+            let weekendCount = 50;
+            
             row.querySelectorAll('td.day-cell').forEach(cell => {
-                if (cell.classList.contains('assigned-gd')) {
-                    cell.textContent = 'Gd';
-                    count = 1;
-                } else if (cell.classList.contains('assigned-cmt')) {
-                    cell.textContent = 'Cmt';
-                    count = 1;
+                const thHeader = table.querySelector(`thead th[data-col="${cell.dataset.col}"]`);
+                const isWeekend = thHeader && thHeader.classList.contains('weekend-col');
+                const isAssigned = cell.classList.contains('assigned-gd') || cell.classList.contains('assigned-cmt');
+                
+                if (isAssigned) {
+                    if (cell.classList.contains('assigned-gd')) {
+                        cell.textContent = 'Gd';
+                    } else {
+                        cell.textContent = 'Cmt';
+                    }
+                    // Reset contagem para o próximo dia
+                    if (isWeekend) {
+                        weekendCount = 1;
+                    } else {
+                        weekdayCount = 1;
+                    }
                 } else {
-                    cell.textContent = count;
-                    count += 1;
+                    // Célula vazia, mostrar número
+                    if (isWeekend) {
+                        cell.textContent = String(weekendCount).padStart(2, '0');
+                        weekendCount += 1;
+                    } else {
+                        cell.textContent = String(weekdayCount).padStart(2, '0');
+                        weekdayCount += 1;
+                    }
                 }
             });
         });
@@ -626,21 +645,22 @@ document.addEventListener('DOMContentLoaded', function(){
 
     document.querySelectorAll('.escala-table').forEach(table => refreshTableCounters(table));
 
-    document.querySelectorAll('.escala-table td.assignable').forEach(cell => {
-        cell.addEventListener('click', function() {
-            const isGd = this.classList.contains('assigned-gd');
-            const isCmt = this.classList.contains('assigned-cmt');
-            this.classList.remove('assigned-gd', 'assigned-cmt');
-            if (!isGd && !isCmt) {
-                this.classList.add('assigned-gd');
-            } else if (isGd) {
-                this.classList.add('assigned-cmt');
-            }
-            const table = this.closest('table');
-            if (table) {
-                refreshTableCounters(table);
-            }
-        });
+    document.addEventListener('click', function(e) {
+        const cell = e.target.closest('td.assignable');
+        if (!cell) return;
+
+        const isGd = cell.classList.contains('assigned-gd');
+        const isCmt = cell.classList.contains('assigned-cmt');
+        cell.classList.remove('assigned-gd', 'assigned-cmt');
+        if (!isGd && !isCmt) {
+            cell.classList.add('assigned-gd');
+        } else if (isGd) {
+            cell.classList.add('assigned-cmt');
+        }
+        const table = cell.closest('table');
+        if (table) {
+            refreshTableCounters(table);
+        }
     });
 
     // Lógica Modal Lote Aditamento

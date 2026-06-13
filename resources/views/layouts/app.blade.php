@@ -99,13 +99,21 @@
                 <button class="menu-toggle" id="menuToggle" title="Alternar Barra Lateral">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <div
-                    style="font-weight: 700; color: var(--primary-olive-dark); font-size: 1.1rem; letter-spacing: -0.5px;">
-                    @yield('title', 'DASHBOARD')
-                </div>
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <img src="{{ asset('tg_logo.png') }}" alt="Logo" style="height: 35px;">
-                </div>
+                @hasSection('header-left')
+                    @yield('header-left')
+                @else
+                    <div style="font-weight: 700; color: var(--primary-olive-dark); font-size: 1.1rem; letter-spacing: -0.5px;">
+                        @yield('title', 'DASHBOARD')
+                    </div>
+                @endif
+
+                @hasSection('header-right')
+                    @yield('header-right')
+                @else
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="{{ asset('tg_logo.png') }}" alt="Logo" style="height: 35px;">
+                    </div>
+                @endif
             </header>
 
             <div class="dashboard-container">

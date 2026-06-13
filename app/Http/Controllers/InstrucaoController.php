@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class InstrucaoController extends Controller
@@ -27,6 +28,44 @@ class InstrucaoController extends Controller
             ->keyBy('numero');
 
         return view('frequencia.index', compact('turma', 'numInicio', 'numFim', 'atiradores', 'ano'));
+    }
+
+    public function showIndividual(User $user, Request $request)
+    {
+        // Validar se é atirador/monitor
+        if (!in_array($user->role, ['atirador', 'monitor'])) {
+            abort(404);
+        }
+
+        $ano = $request->input('ano', config('tg.turma_ativa', date('Y')));
+        
+        // Criar array de meses com informações de dias
+        $meses = [];
+        $nomesMeses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+        
+        for ($mes = 1; $mes <= 12; $mes++) {
+            $primeiroDia = Carbon::create($ano, $mes, 1);
+            $ultimoDia = $primeiroDia->copy()->endOfMonth();
+            $diasDoMes = [];
+            
+            for ($dia = 1; $dia <= $ultimoDia->day; $dia++) {
+                $data = Carbon::create($ano, $mes, $dia);
+                $diasDoMes[] = [
+                    'dia' => $dia,
+                    'data' => $data->format('Y-m-d'),
+                    'diaSemana' => $data->dayName,
+                ];
+            }
+            
+            $meses[] = [
+                'mes' => $mes,
+                'nome' => $nomesMeses[$mes - 1],
+                'dias' => $diasDoMes,
+                'maxDias' => $ultimoDia->day
+            ];
+        }
+
+        return view('frequencia.individual', compact('user', 'ano', 'meses'));
     }
 
     public function salvar(Request $request)
