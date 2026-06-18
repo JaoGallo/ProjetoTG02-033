@@ -2,41 +2,6 @@
 
 @section('title', 'Dashboard')
 
-@section('header-right')
-    <div style="display: flex; align-items: center; gap: 1rem;">
-        @if(Auth::user()->role === 'atirador' || Auth::user()->role === 'monitor')
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <div style="text-align: right; border-right: 1px solid var(--border-color); padding-right: 1rem;">
-                    <span style="display: block; font-size: 0.6rem; color: var(--text-secondary); font-weight: 800; text-transform: uppercase;">Faltas</span>
-                    <span style="font-size: 1.1rem; font-weight: 800; color: var(--primary-olive-dark);">{{ Auth::user()->faults }}</span>
-                </div>
-                <div style="text-align: right; border-right: 1px solid var(--border-color); padding-right: 1rem;">
-                    <span style="display: block; font-size: 0.6rem; color: var(--text-secondary); font-weight: 800; text-transform: uppercase;">Pontos</span>
-                    <span style="font-size: 1.1rem; font-weight: 800; color: {{ Auth::user()->points >= 100 ? '#c53030' : 'var(--primary-olive-dark)' }};">
-                        {{ Auth::user()->points }}<small style="font-size: 0.65rem; opacity: 0.5;">/120</small>
-                    </span>
-                </div>
-            </div>
-        @endif
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div>
-                <h2 style="margin: 0; font-size: 0.95rem; line-height: 1.2; text-align: right;">{{ Auth::user()->name }}</h2>
-                <div style="display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end;">
-                    <span class="badge" style="font-size: 0.55rem; padding: 1px 6px;">{{ strtoupper(Auth::user()->role) }}</span>
-                    <span style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 600;">RA: {{ Auth::user()->ra }}</span>
-                </div>
-            </div>
-            <div class="dash-avatar" style="width: 40px; height: 40px;">
-                @if(Auth::user()->photo)
-                    <img src="{{ asset('storage/' . Auth::user()->photo) }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
-                @else
-                    <i class="fa-solid fa-user" style="font-size: 1rem;"></i>
-                @endif
-            </div>
-        </div>
-    </div>
-@endsection
-
 @section('content')
     <!-- Alerta de Proximidade do Limite -->
     @if(Auth::user()->points >= 100)
